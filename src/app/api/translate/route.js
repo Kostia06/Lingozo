@@ -53,49 +53,30 @@ export async function POST(request) {
       return NextResponse.json({ translation: cachedTranslation.translation });
     }
 
-    // Get user's AI provider settings
-    let aiProvider = 'gemini';
-    let apiKey = process.env.GOOGLE_AI_API_KEY;
-    let userId = null;
+    // Always use Gemini with server API key
+    const aiProvider = 'gemini';
+    const apiKey = process.env.GOOGLE_AI_API_KEY;
 
+    if (!apiKey) {
+      console.error('GOOGLE_AI_API_KEY is not configured on server');
+      return NextResponse.json(
+        { error: 'Translation service is not available' },
+        { status: 500 }
+      );
+    }
+
+    // Get user ID for usage tracking (optional)
+    let userId = null;
     if (chatId && authHeader) {
-      const { data: chat, error: chatError } = await supabase
+      const { data: chat } = await supabase
         .from('chats')
         .select('user_id')
         .eq('id', chatId)
         .single();
 
-      if (!chatError && chat) {
+      if (chat) {
         userId = chat.user_id;
-        const { data: userSettings } = await supabase
-          .from('user_settings')
-          .select('ai_provider, gemini_api_key, openai_api_key, claude_api_key')
-          .eq('id', chat.user_id)
-          .single();
-
-        if (userSettings) {
-          aiProvider = userSettings.ai_provider || 'gemini';
-
-          switch (aiProvider) {
-            case 'openai':
-              apiKey = userSettings.openai_api_key || process.env.OPENAI_API_KEY;
-              break;
-            case 'claude':
-              apiKey = userSettings.claude_api_key || process.env.ANTHROPIC_API_KEY;
-              break;
-            case 'gemini':
-            default:
-              apiKey = userSettings.gemini_api_key || process.env.GOOGLE_AI_API_KEY;
-          }
-        }
       }
-    }
-
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'Please add your API key in Settings' },
-        { status: 401 }
-      );
     }
 
     // Create AI provider and translate

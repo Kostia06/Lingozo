@@ -112,7 +112,7 @@ export default function Home() {
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              Kang
+              Lingozo
             </motion.h1>
             <motion.div
               className="inline-block px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20"

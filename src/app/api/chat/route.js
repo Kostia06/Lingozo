@@ -4,7 +4,7 @@ import { createAIProvider, generateSystemPrompt, parseAIResponse, detectMessageL
 
 export async function POST(request) {
   try {
-    const { chatId, message, language } = await request.json();
+    const { chatId, message, language, featureMode, replyToId } = await request.json();
 
     // Get auth token from request header
     const authHeader = request.headers.get('authorization');
@@ -52,47 +52,69 @@ export async function POST(request) {
       );
     }
 
-
-
-    // Get user's settings (AI provider, API keys, preferences)
-    const { data: userSettings, error: settingsError } = await supabase
-      .from('user_settings')
-      .select('ai_provider, gemini_api_key, openai_api_key, claude_api_key, enable_memes, enable_music')
+    // Check if user is premium (unlimited)
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('is_premium')
       .eq('id', chatData.user_id)
       .single();
 
-    // Ignore "no rows" error and table not found errors
-    if (settingsError &&
-        settingsError.code !== 'PGRST116' &&
-        !settingsError.message?.includes('relation') &&
-        !settingsError.message?.includes('does not exist') &&
-        settingsError.code !== '42P01') {
-      console.error('Error fetching user settings:', settingsError);
+    // Silently handle missing table or profile (default to non-premium)
+    if (profileError && profileError.code !== 'PGRST116' && profileError.code !== '42P01') {
+      console.error('Error checking premium status:', profileError);
     }
 
-    // Determine AI provider and get appropriate API key
-    const aiProvider = userSettings?.ai_provider || 'gemini';
-    let apiKey;
+    const isPremium = profile?.is_premium || false;
 
-    switch (aiProvider) {
-      case 'openai':
-        apiKey = userSettings?.openai_api_key || process.env.OPENAI_API_KEY;
-        break;
-      case 'claude':
-        apiKey = userSettings?.claude_api_key || process.env.ANTHROPIC_API_KEY;
-        break;
-      case 'gemini':
-      default:
-        apiKey = userSettings?.gemini_api_key || process.env.GOOGLE_AI_API_KEY;
+    // Check message limit for non-premium users (20 messages per day)
+    if (!isPremium) {
+      // Get today's start timestamp (midnight UTC)
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const todayISO = today.toISOString();
+
+      // Count user's messages sent today
+      const { count, error: countError } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('chat_id', chatId)
+        .eq('role', 'user')
+        .gte('created_at', todayISO);
+
+      if (countError) {
+        console.error('Error counting messages:', countError);
+      }
+
+      if (count >= 20) {
+        return NextResponse.json(
+          { error: 'You have reached the daily limit of 20 messages. Your limit will reset tomorrow, or you can upgrade to premium for unlimited messages.' },
+          { status: 429 }
+        );
+      }
     }
+
+    // Always use Gemini with the server's API key for all users
+    const aiProvider = 'gemini';
+    const apiKey = process.env.GOOGLE_AI_API_KEY;
 
     if (!apiKey) {
-      const providerName = AI_PROVIDERS[aiProvider.toUpperCase()]?.name || 'AI';
+      console.error('GOOGLE_AI_API_KEY is not configured on server');
       return NextResponse.json(
-        { error: `Please add your ${providerName} API key in Settings.` },
-        { status: 401 }
+        { error: 'AI service is not available. Please contact support.' },
+        { status: 500 }
       );
     }
+
+    // Get user's preferences (memes, music) - enable by default
+    const { data: userSettings } = await supabase
+      .from('user_settings')
+      .select('enable_memes, enable_music')
+      .eq('id', chatData.user_id)
+      .single();
+
+    // Enable memes and music by default for everyone
+    const enableMemes = userSettings?.enable_memes !== false; // Default to true
+    const enableMusic = userSettings?.enable_music !== false; // Default to true
 
     // Create AI provider instance
     const ai = createAIProvider(aiProvider, apiKey);
@@ -113,6 +135,7 @@ export async function POST(request) {
           role: 'user',
           content: message,
           corrections: [],
+          reply_to_id: replyToId || null,
         },
       ])
       .select()
@@ -145,24 +168,32 @@ export async function POST(request) {
         .update({ hit_count: cachedResponse.hit_count + 1 })
         .eq('id', cachedResponse.id);
     } else {
-      // Generate system prompt
-      const enableMemes = userSettings?.enable_memes || false;
-      const enableMusic = userSettings?.enable_music || false;
-      const systemPrompt = generateSystemPrompt(language, enableMemes, enableMusic);
+      // Generate system prompt (with feature mode support)
+      const systemPrompt = generateSystemPrompt(language, enableMemes, enableMusic, featureMode);
 
       // Override language in prompt if user asked for explanation in English
       const finalSystemPrompt = shouldRespondInTargetLanguage
         ? systemPrompt
         : systemPrompt.replace(/ONLY in \${language}/g, `in English when explaining, otherwise in ${language}`);
 
-      // Build conversation history
+      // Build conversation history with reply context
       const conversationHistory = [
         ...messages.map(msg => ({
           role: msg.role,
           content: msg.content
-        })),
-        { role: 'user', content: message }
+        }))
       ];
+
+      // Add current user message with reply context if replying
+      let userMessageContent = message;
+      if (replyToId) {
+        const repliedMessage = messages.find(m => m.id === replyToId);
+        if (repliedMessage) {
+          userMessageContent = `[Replying to: "${repliedMessage.content.substring(0, 100)}${repliedMessage.content.length > 100 ? '...' : ''}"]\n\n${message}`;
+        }
+      }
+
+      conversationHistory.push({ role: 'user', content: userMessageContent });
 
       // Call AI provider
       responseText = await ai.chat(conversationHistory, finalSystemPrompt, language);
@@ -201,18 +232,67 @@ export async function POST(request) {
         .eq('id', userMessage.id);
     }
 
-    // Save AI response
-    const { data: assistantMessage } = await supabase
-      .from('messages')
-      .insert([
-        {
-          chat_id: chatId,
-          role: 'assistant',
-          content: aiResponse.response,
-        },
-      ])
-      .select()
-      .single();
+    // Determine if AI should reply to the user message (if user was replying to AI, AI should reply back)
+    let aiReplyToId = null;
+    if (replyToId) {
+      const { data: repliedMessage } = await supabase
+        .from('messages')
+        .select('role')
+        .eq('id', replyToId)
+        .single();
+
+      // If user replied to an AI message, AI should reply to user's message
+      if (repliedMessage && repliedMessage.role === 'assistant') {
+        aiReplyToId = userMessage.id;
+      }
+    }
+
+    // Save AI response(s) - handle both single and multiple messages
+    let assistantMessage = null;
+    if (aiResponse.isMultiMessage && aiResponse.messages) {
+      // Save multiple messages with slight delays
+      const savedMessages = [];
+      for (let i = 0; i < aiResponse.messages.length; i++) {
+        const msg = aiResponse.messages[i];
+        const { data } = await supabase
+          .from('messages')
+          .insert([
+            {
+              chat_id: chatId,
+              role: 'assistant',
+              content: msg.content,
+              reply_to_id: i === 0 ? aiReplyToId : null, // Only first message replies
+              read_at: null, // Mark as unread
+            },
+          ])
+          .select()
+          .single();
+
+        savedMessages.push(data);
+
+        // Add small delay between messages (except for last one)
+        if (i < aiResponse.messages.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+      assistantMessage = savedMessages[savedMessages.length - 1]; // Last message for references
+    } else {
+      // Save single AI response
+      const { data } = await supabase
+        .from('messages')
+        .insert([
+          {
+            chat_id: chatId,
+            role: 'assistant',
+            content: aiResponse.response,
+            reply_to_id: aiReplyToId,
+            read_at: null, // Mark as unread
+          },
+        ])
+        .select()
+        .single();
+      assistantMessage = data;
+    }
 
     // Save grammar note if provided
     if (grammarNote && grammarNote.title) {

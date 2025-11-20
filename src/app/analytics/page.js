@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import Sidebar from '@/components/Sidebar';
+import Navbar from '@/components/Navbar';
 import {
   TrendingUp,
   MessageSquare,
@@ -16,17 +16,17 @@ import {
   Award,
   Globe,
   Flame,
-  Loader2,
-  Menu
+  Loader2
 } from 'lucide-react';
 
 export default function AnalyticsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [chatStats, setChatStats] = useState([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const selectedChatId = searchParams.get('chat');
 
   useEffect(() => {
     if (!user) {
@@ -78,7 +78,7 @@ export default function AnalyticsPage() {
       icon: Target,
       label: 'Accuracy',
       value: `${stats.overall_accuracy_percentage || 100}%`,
-      color: 'from-green-500 to-emerald-500',
+      color: 'from-purple-500 to-violet-500',
       trend: '+5%'
     },
     {
@@ -113,39 +113,18 @@ export default function AnalyticsPage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'block' : 'hidden'} md:block fixed md:relative inset-0 z-40`}>
-        <Sidebar onChatSelect={(id) => router.push(`/chat/${id}`)} onClose={() => setSidebarOpen(false)} />
-      </div>
-
-      {/* Overlay for mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {/* Navbar */}
+      <Navbar currentChatId={selectedChatId} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Mobile Menu Button */}
-            <motion.button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Menu className="w-6 h-6 text-gray-700" />
-            </motion.button>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Learning Analytics
-              </h1>
-              <p className="text-gray-500 text-xs sm:text-sm mt-1">Track your progress and improvements</p>
-            </div>
+        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Learning Analytics
+            </h1>
+            <p className="text-gray-500 text-xs sm:text-sm mt-1">Track your progress and improvements</p>
           </div>
         </div>
 
@@ -192,7 +171,7 @@ export default function AnalyticsPage() {
                     </div>
                     <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
                     <div className="text-xs text-gray-600 mb-2">{stat.label}</div>
-                    <div className="text-xs text-green-600 font-medium">{stat.trend}</div>
+                    <div className="text-xs text-purple-600 font-medium">{stat.trend}</div>
                   </motion.div>
                 ))}
               </div>
@@ -265,7 +244,7 @@ export default function AnalyticsPage() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.8 + index * 0.05 }}
                         className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => router.push(`/chat/${chat.chat_id}`)}
+                        onClick={() => router.push(`/analytics?chat=${chat.chat_id}`)}
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div>

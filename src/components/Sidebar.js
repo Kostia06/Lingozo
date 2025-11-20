@@ -10,14 +10,16 @@ import {
   Trash2,
   LogOut,
   Loader2,
-  TrendingUp,
   Home,
   Settings,
-  BarChart3
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+  Globe
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 
-export default function Sidebar({ currentChatId, onChatSelect, onClose }) {
+export default function Sidebar({ currentChatId, onChatSelect, onClose, isCollapsed, onToggle }) {
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showNewChatModal, setShowNewChatModal] = useState(false);
@@ -131,28 +133,61 @@ export default function Sidebar({ currentChatId, onChatSelect, onClose }) {
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
+  const sidebarVariants = {
+    expanded: {
+      width: '288px',
+      transition: { type: 'spring', stiffness: 300, damping: 30 }
+    },
+    collapsed: {
+      width: '80px',
+      transition: { type: 'spring', stiffness: 300, damping: 30 }
+    }
+  };
+
   return (
     <>
       <motion.div
         initial={{ x: -300 }}
-        animate={{ x: 0 }}
-        className="w-72 sm:w-80 bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 text-white flex flex-col h-screen border-r border-gray-800/50 backdrop-blur-sm"
+        animate={isCollapsed ? 'collapsed' : 'expanded'}
+        variants={sidebarVariants}
+        className="bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 text-white flex flex-col h-screen border-r border-gray-800/50 backdrop-blur-sm relative"
       >
+        {/* Toggle Button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={onToggle}
+          className="absolute -right-3 top-6 z-50 w-6 h-6 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+        >
+          {isCollapsed ? (
+            <ChevronRight className="w-3 h-3 text-white" />
+          ) : (
+            <ChevronLeft className="w-3 h-3 text-white" />
+          )}
+        </motion.button>
+
         {/* Header */}
         <div className="p-6 border-b border-gray-800/50">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="cursor-pointer"
+            className="cursor-pointer flex items-center gap-3"
             onClick={() => {
               router.push('/dashboard');
               if (onClose) onClose();
             }}
           >
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Kang
-            </h1>
-            <p className="text-xs text-gray-500 mt-1">AI Language Learning</p>
+            <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-violet-400 rounded-lg flex items-center justify-center">
+              <Globe className="w-5 h-5 text-white" />
+            </div>
+            {!isCollapsed && (
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
+                  Lingozo
+                </h1>
+                <p className="text-xs text-gray-500 mt-0.5">AI Language Learning</p>
+              </div>
+            )}
           </motion.div>
         </div>
 
@@ -167,123 +202,127 @@ export default function Sidebar({ currentChatId, onChatSelect, onClose }) {
               }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`w-full px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
+              className={`w-full px-3 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 transition-all ${
                 pathname === item.path
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/20'
+                  ? 'bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/20'
                   : 'bg-gray-800/30 hover:bg-gray-800/50 text-gray-300 hover:text-white'
               }`}
             >
-              <item.icon className="w-5 h-5" />
-              {item.label}
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              {!isCollapsed && <span className="truncate">{item.label}</span>}
             </motion.button>
           ))}
         </div>
 
         {/* Action Button */}
-        <div className="p-4">
-          <motion.button
-            onClick={() => setShowNewChatModal(true)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20 transition-all"
-          >
-            <Plus className="w-5 h-5" />
-            New Conversation
-          </motion.button>
-        </div>
+        {!isCollapsed && (
+          <div className="p-4">
+            <motion.button
+              onClick={() => setShowNewChatModal(true)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20 transition-all"
+            >
+              <Plus className="w-5 h-5" />
+              New Conversation
+            </motion.button>
+          </div>
+        )}
 
         {/* Chat List */}
-        <div className="flex-1 overflow-y-auto px-3 custom-scrollbar">
-          <div className="px-1 mb-2">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Recent Chats
-            </h3>
+        {!isCollapsed && (
+          <div className="flex-1 overflow-y-auto px-3 custom-scrollbar">
+            <div className="px-1 mb-2">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Recent Chats
+              </h3>
+            </div>
+            <AnimatePresence mode="popLayout">
+              {loading ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex flex-col items-center justify-center py-12 text-gray-500"
+                >
+                  <Loader2 className="w-6 h-6 animate-spin mb-2" />
+                  <p className="text-sm">Loading chats...</p>
+                </motion.div>
+              ) : chats.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="flex flex-col items-center justify-center py-12 px-4"
+                >
+                  <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-3">
+                    <MessageCircle className="w-8 h-8 text-gray-600" />
+                  </div>
+                  <p className="text-gray-500 text-sm text-center">
+                    No conversations yet
+                  </p>
+                  <p className="text-gray-600 text-xs text-center mt-1">
+                    Start a new chat to begin learning!
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div className="space-y-2 pb-4">
+                  {chats.slice(0, 5).map((chat, index) => (
+                    <motion.div
+                      key={chat.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ scale: 1.02 }}
+                      onClick={() => {
+                        if (onChatSelect) {
+                          onChatSelect(chat.id);
+                        } else {
+                          router.push(`/chat/${chat.id}`);
+                        }
+                        if (onClose) onClose();
+                      }}
+                      className={`p-3 rounded-xl cursor-pointer group relative transition-all ${
+                        (currentChatId === chat.id || pathname === `/chat/${chat.id}`)
+                          ? 'bg-gradient-to-r from-purple-600/20 to-violet-600/20 border border-purple-500/30 shadow-lg shadow-purple-500/10'
+                          : 'bg-gray-800/30 hover:bg-gray-800/50 border border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 text-lg">
+                          {getLanguageFlag(chat.language)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold truncate text-white">
+                            {chat.title}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {chat.language}
+                          </p>
+                        </div>
+                        <motion.button
+                          onClick={(e) => handleDeleteChat(chat.id, e)}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          className="opacity-0 group-hover:opacity-100 flex-shrink-0 p-1 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </motion.button>
+                      </div>
+                      {(currentChatId === chat.id || pathname === `/chat/${chat.id}`) && (
+                        <motion.div
+                          layoutId="activeIndicator"
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-purple-500 to-violet-500 rounded-r-full"
+                        />
+                      )}
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          <AnimatePresence mode="popLayout">
-            {loading ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center py-12 text-gray-500"
-              >
-                <Loader2 className="w-6 h-6 animate-spin mb-2" />
-                <p className="text-sm">Loading chats...</p>
-              </motion.div>
-            ) : chats.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="flex flex-col items-center justify-center py-12 px-4"
-              >
-                <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-3">
-                  <MessageCircle className="w-8 h-8 text-gray-600" />
-                </div>
-                <p className="text-gray-500 text-sm text-center">
-                  No conversations yet
-                </p>
-                <p className="text-gray-600 text-xs text-center mt-1">
-                  Start a new chat to begin learning!
-                </p>
-              </motion.div>
-            ) : (
-              <motion.div className="space-y-2 pb-4">
-                {chats.map((chat, index) => (
-                  <motion.div
-                    key={chat.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ delay: index * 0.05 }}
-                    whileHover={{ scale: 1.02 }}
-                    onClick={() => {
-                      if (onChatSelect) {
-                        onChatSelect(chat.id);
-                      } else {
-                        router.push(`/chat/${chat.id}`);
-                      }
-                      if (onClose) onClose();
-                    }}
-                    className={`p-4 rounded-xl cursor-pointer group relative transition-all ${
-                      (currentChatId === chat.id || pathname === `/chat/${chat.id}`)
-                        ? 'bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 shadow-lg shadow-purple-500/10'
-                        : 'bg-gray-800/30 hover:bg-gray-800/50 border border-transparent'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 text-2xl">
-                        {getLanguageFlag(chat.language)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold truncate text-white">
-                          {chat.title}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {chat.language}
-                        </p>
-                      </div>
-                      <motion.button
-                        onClick={(e) => handleDeleteChat(chat.id, e)}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="opacity-0 group-hover:opacity-100 flex-shrink-0 p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </motion.button>
-                    </div>
-                    {(currentChatId === chat.id || pathname === `/chat/${chat.id}`) && (
-                      <motion.div
-                        layoutId="activeIndicator"
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-r-full"
-                      />
-                    )}
-                  </motion.div>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        )}
 
         {/* User Section */}
         <motion.div
@@ -294,27 +333,31 @@ export default function Sidebar({ currentChatId, onChatSelect, onClose }) {
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center font-semibold">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-500 rounded-full flex items-center justify-center font-semibold flex-shrink-0">
                 {user?.email?.[0]?.toUpperCase()}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate text-white">
-                  {user?.email?.split('@')[0]}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user?.email}
-                </p>
-              </div>
+              {!isCollapsed && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate text-white">
+                    {user?.email?.split('@')[0]}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {user?.email}
+                  </p>
+                </div>
+              )}
             </div>
-            <motion.button
-              onClick={signOut}
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              whileTap={{ scale: 0.9 }}
-              className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
-              title="Sign out"
-            >
-              <LogOut className="w-5 h-5" />
-            </motion.button>
+            {!isCollapsed && (
+              <motion.button
+                onClick={signOut}
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all flex-shrink-0"
+                title="Sign out"
+              >
+                <LogOut className="w-5 h-5" />
+              </motion.button>
+            )}
           </div>
         </motion.div>
 
@@ -340,7 +383,7 @@ export default function Sidebar({ currentChatId, onChatSelect, onClose }) {
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl"
           >
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text text-transparent mb-6">
               Start New Conversation
             </h3>
             <div className="space-y-5">
@@ -377,7 +420,7 @@ export default function Sidebar({ currentChatId, onChatSelect, onClose }) {
                   onClick={handleNewChat}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-violet-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
                 >
                   Create
                 </motion.button>

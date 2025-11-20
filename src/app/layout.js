@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 
 export const metadata = {
-  title: "Kang - Language Learning with AI",
+  title: "Lingozo - Language Learning with AI",
   description: "Learn languages with AI-powered conversations and feedback",
   icons: {
     icon: "/logo.svg", // path in `public/` folder
@@ -27,7 +27,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
