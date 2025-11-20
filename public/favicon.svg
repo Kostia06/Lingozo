@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed" />
+      <stop offset="50%" style="stop-color:#a855f7" />
+      <stop offset="100%" style="stop-color:#c026d3" />
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded rectangle background -->
+  <rect width="32" height="32" rx="6" fill="url(#iconGrad)"/>
+
+  <!-- Bold "L" letter -->
+  <path d="M 10 8 L 10 24 L 22 24"
+        stroke="white"
+        stroke-width="3.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"/>
+
+  <!-- Small chat bubble accent -->
+  <circle cx="24" cy="10" r="4" fill="white" opacity="0.4"/>
+</svg>
