@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Home,
   Menu,
@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export default function Navbar({ onChatSelect, currentChatId }) {
+export default function Navbar({ onChatSelect, currentChatId, isMobileOpen, onMobileClose }) {
   const [isOpen, setIsOpen] = useState(true);
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,6 +91,10 @@ export default function Navbar({ onChatSelect, currentChatId }) {
     } else {
       // Always navigate to dashboard with query parameter
       router.push(`/dashboard?chat=${chatId}`, { scroll: false });
+    }
+    // Close mobile menu after selection
+    if (onMobileClose) {
+      onMobileClose();
     }
   };
 
@@ -169,33 +173,61 @@ export default function Navbar({ onChatSelect, currentChatId }) {
 
   return (
     <>
+      {/* Mobile Backdrop Overlay */}
+      {isMobileOpen && (
+        <div
+          onClick={onMobileClose}
+          className="md:hidden fixed inset-0 bg-black/60 z-[9998] animate-in fade-in duration-200"
+        />
+      )}
+
+      {/* Sidebar */}
       <aside
-        className={`${
-          isOpen ? "w-64" : "w-16"
-        } flex flex-col border-r border-white/20 bg-white/10 backdrop-blur-md text-white h-screen transition-all duration-300 ease-in-out relative shadow-xl`}
+        className={`
+          flex flex-col text-white h-screen
+          bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 md:bg-white/10 md:backdrop-blur-sm md:border-r md:border-white/20
+          fixed md:relative z-[9999] md:z-auto top-0 left-0
+          w-full
+          transition-all duration-300 ease-out
+          ${isMobileOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 md:translate-x-0 md:opacity-100'}
+          md:transition-[width] md:duration-300
+          ${isOpen ? 'md:w-64' : 'md:w-16'}
+        `}
       >
         {/* Header */}
-        <div className={`flex h-16 items-center ${isOpen ? 'justify-between' : 'justify-center'} border-b border-white/20 px-4`}>
-          {isOpen ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={() => router.push("/dashboard")}
-            >
-              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                <Globe className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-white">
+        <div className={`flex h-16 min-h-[4rem] items-center border-b border-white/20 px-4 ${isOpen ? 'justify-between' : 'justify-center'}`}>
+          {isOpen && (
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div
+                className="flex items-center gap-3 cursor-pointer"
+                onClick={() => {
+                  router.push("/dashboard");
+                  if (onMobileClose) onMobileClose();
+                }}
+              >
+                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Globe className="w-5 h-5 text-white" />
+                </div>
+                <h1 className="text-lg font-bold text-white whitespace-nowrap">
                   Lingozo
                 </h1>
               </div>
-            </motion.div>
-          ) : null}
-          <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} className="flex-shrink-0">
+            </div>
+          )}
+          {/* Desktop collapse button */}
+          {!isMobileOpen && (
+          <Button variant="ghost" size="icon" onClick={() => setIsOpen((!isOpen) || isMobileOpen)} className="flex-shrink-0 hidden md:flex">
             <Menu className="h-6 w-6" />
           </Button>
+          )}
+          {/* Mobile close button */}
+          {isMobileOpen && (
+            <Button variant="ghost" size="icon" onClick={onMobileClose} className="flex-shrink-0 md:hidden">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </Button>
+          )}
         </div>
 
         <ScrollArea className="flex-1">
@@ -205,7 +237,10 @@ export default function Navbar({ onChatSelect, currentChatId }) {
               <Button
                 key={item.path}
                 variant="ghost"
-                onClick={() => router.push(item.path)}
+                onClick={() => {
+                  router.push(item.path);
+                  if (onMobileClose) onMobileClose();
+                }}
                 title={!isOpen ? item.label : undefined}
                 className={`w-full ${isOpen ? 'justify-start' : 'justify-center px-0'} ${
                   pathname === item.path
@@ -213,7 +248,7 @@ export default function Navbar({ onChatSelect, currentChatId }) {
                     : "text-white hover:text-white hover:bg-white/20"
                 }`}
               >
-                <item.icon className={`${isOpen ? 'h-5 w-5 mr-2' : 'h-6 w-6'}`} />
+                <item.icon className={`${isOpen ? 'h-5 w-5 mr-2' : 'h-6 w-6 -m-1'}`} />
                 {isOpen && item.label}
               </Button>
             ))}
@@ -300,7 +335,7 @@ export default function Navbar({ onChatSelect, currentChatId }) {
         </ScrollArea>
 
         {/* User Section with Glass Effect */}
-        <div className="p-4 border-t border-white/20 bg-white/10 backdrop-blur-md">
+        <div className={`${!isOpen ? 'p-0' : 'p-4'}   border-t border-white/20 bg-white/10 backdrop-blur-md`}>
           {isOpen ? (
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-semibold flex-shrink-0 text-base text-white">

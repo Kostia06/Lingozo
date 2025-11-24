@@ -16,7 +16,8 @@ import {
   Award,
   Globe,
   Flame,
-  Loader2
+  Loader2,
+  Menu
 } from 'lucide-react';
 
 export default function AnalyticsContent() {
@@ -26,6 +27,7 @@ export default function AnalyticsContent() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [chatStats, setChatStats] = useState([]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const selectedChatId = searchParams.get('chat');
 
   useEffect(() => {
@@ -114,17 +116,37 @@ export default function AnalyticsContent() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Navbar */}
-      <Navbar currentChatId={selectedChatId} />
+      <Navbar
+        currentChatId={selectedChatId}
+        isMobileOpen={isMobileMenuOpen}
+        onMobileClose={() => setIsMobileMenuOpen(false)}
+      />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Floating Menu Button - Top Left */}
+        {!isMobileMenuOpen && (
+          <motion.button
+            onClick={() => setIsMobileMenuOpen(true)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="md:hidden fixed top-4 left-4 z-[9997] w-12 h-12 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl shadow-xl flex items-center justify-center text-white backdrop-blur-sm"
+          >
+            <Menu className="w-5 h-5" />
+          </motion.button>
+        )}
+
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Learning Analytics
-            </h1>
-            <p className="text-gray-500 text-xs sm:text-sm mt-1">Track your progress and improvements</p>
+        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center gap-3 pl-12 md:pl-0">
+            <div>
+              <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Learning Analytics
+              </h1>
+              <p className="text-gray-500 text-xs sm:text-sm mt-1">Track your progress and improvements</p>
+            </div>
           </div>
         </div>
 

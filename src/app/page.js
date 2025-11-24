@@ -108,7 +108,7 @@ export default function Home() {
           {/* Logo/Title */}
           <motion.div variants={itemVariants} className="mb-6">
             <motion.h1
-              className="text-7xl md:text-8xl font-bold text-white mb-4"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-4"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
@@ -118,7 +118,7 @@ export default function Home() {
               className="inline-block px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20"
               whileHover={{ scale: 1.05 }}
             >
-              <p className="text-xl text-white/90 font-medium">
+              <p className="text-base sm:text-lg md:text-xl text-white/90 font-medium">
                 Learn Languages with AI
               </p>
             </motion.div>
@@ -157,7 +157,7 @@ export default function Home() {
           {/* Stats */}
           <motion.div
             variants={itemVariants}
-            className="grid grid-cols-3 gap-4 max-w-2xl mx-auto mb-16"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-2xl mx-auto mb-16"
           >
             {stats.map((stat, index) => (
               <motion.div
@@ -166,8 +166,8 @@ export default function Home() {
                 className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
               >
                 <stat.icon className="w-6 h-6 text-white mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-                <div className="text-sm text-white/70">{stat.label}</div>
+                <div className="text-xl sm:text-2xl font-bold text-white mb-1">{stat.value}</div>
+                <div className="text-xs sm:text-sm text-white/70">{stat.label}</div>
               </motion.div>
             ))}
           </motion.div>

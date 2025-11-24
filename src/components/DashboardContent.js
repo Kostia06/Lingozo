@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar';
 import ChatInterface from '@/components/ChatInterface';
 import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
-import { MessageSquare, Plus, Clock, Loader2 } from 'lucide-react';
+import { MessageSquare, Plus, Clock, Loader2, Menu } from 'lucide-react';
 
 export default function DashboardContent() {
   const { user, loading } = useAuth();
@@ -20,6 +20,7 @@ export default function DashboardContent() {
   const [newChatTitle, setNewChatTitle] = useState('');
   const [selectedChat, setSelectedChat] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const selectedChatId = searchParams.get('chat');
 
   useEffect(() => {
@@ -171,8 +172,12 @@ export default function DashboardContent() {
       </div>
 
       {/* Navbar */}
-      <div className="relative z-10">
-        <Navbar currentChatId={selectedChatId} />
+      <div className="relative">
+        <Navbar
+          currentChatId={selectedChatId}
+          isMobileOpen={isMobileMenuOpen}
+          onMobileClose={() => setIsMobileMenuOpen(false)}
+        />
       </div>
 
       {/* Main Content */}
@@ -181,20 +186,31 @@ export default function DashboardContent() {
         <ChatInterface
           chatId={selectedChat.id}
           language={selectedChat.language}
-          onMenuClick={() => {
-            // Clear selection to go back to chat list
-            router.push('/dashboard');
-          }}
+          onMenuClick={() => setIsMobileMenuOpen(true)}
         />
       ) : (
         // Show Chat List when no chat is selected
         <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+          {/* Mobile Floating Menu Button - Top Left */}
+          {!isMobileMenuOpen && (
+            <motion.button
+              onClick={() => setIsMobileMenuOpen(true)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="md:hidden fixed top-4 left-4 z-[9997] w-12 h-12 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl shadow-xl flex items-center justify-center text-white backdrop-blur-sm"
+            >
+              <Menu className="w-5 h-5" />
+            </motion.button>
+          )}
+
           {/* Header with Glass Effect */}
-          <div className="bg-white/10 backdrop-blur-md border-b border-white/20 px-4 sm:px-6 py-4 shadow-lg">
+          <div className="bg-white/10 backdrop-blur-md border-b border-white/20 px-4 sm:px-6 py-3 sm:py-4 shadow-lg">
             <div className="flex items-center justify-between">
-              <div className="flex-1">
+              <div className="flex-1 pl-12 md:pl-0">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-xl sm:text-2xl font-bold text-white">
+                  <h1 className="text-lg sm:text-2xl font-bold text-white">
                     My Conversations
                   </h1>
                   {!isPremium && (

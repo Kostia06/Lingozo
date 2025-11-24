@@ -638,15 +638,17 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
           />
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Floating Menu Button - Top Left */}
         {onMenuClick && (
           <motion.button
             onClick={onMenuClick}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="md:hidden absolute top-4 left-4 p-3 bg-white/10 backdrop-blur-md rounded-xl shadow-lg border border-white/20 z-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="md:hidden fixed top-3 left-3 z-[9997] w-12 h-12 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl shadow-xl flex items-center justify-center text-white backdrop-blur-sm"
           >
-            <Menu className="w-6 h-6 text-white" />
+            <Menu className="w-5 h-5" />
           </motion.button>
         )}
         <div className="text-center max-w-md relative z-10">
@@ -690,29 +692,33 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
         />
       </div>
 
+      {/* Mobile Floating Menu Button - Top Left */}
+      {onMenuClick && (
+        <motion.button
+          onClick={onMenuClick}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="md:hidden fixed top-3 left-3 z-[9997] w-12 h-12 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl shadow-xl flex items-center justify-center text-white backdrop-blur-sm"
+        >
+          <Menu className="w-5 h-5" />
+        </motion.button>
+      )}
+
       {/* Header with Glass Effect */}
-      <div className="bg-white/10 backdrop-blur-md border-b border-white/20 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2 shadow-lg relative z-10">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          {/* Mobile Menu Button */}
-          {onMenuClick && (
-            <motion.button
-              onClick={onMenuClick}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="md:hidden p-2 hover:bg-white/20 rounded-xl transition-colors flex-shrink-0"
-            >
-              <Menu className="w-6 h-6 text-white" />
-            </motion.button>
-          )}
-          <div className="min-w-0 flex items-center gap-3">
-            <h2 className="text-base sm:text-lg font-bold text-white truncate">
+      <div className="bg-white/10 backdrop-blur-md border-b border-white/20 px-3 sm:px-6 py-2 sm:py-4 flex items-center justify-between gap-2 shadow-lg relative z-10">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          {/* Mobile: Add left padding to avoid hamburger overlap */}
+          <div className="pl-12 md:pl-0 min-w-0 flex items-center gap-2 flex-1">
+            <h2 className="text-sm sm:text-lg font-bold text-white truncate">
               Learning {language}
             </h2>
             {!isPremium && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className={`px-3 py-1 backdrop-blur-md rounded-full border ${
+                className={`hidden sm:flex px-2 sm:px-3 py-1 backdrop-blur-md rounded-full border ${
                   todayMessageCount >= 18
                     ? 'bg-red-500/20 border-red-400/40'
                     : 'bg-white/20 border-white/30'
@@ -721,7 +727,7 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
                 <span className={`text-xs font-semibold ${
                   todayMessageCount >= 18 ? 'text-red-200' : 'text-white'
                 }`}>
-                  {todayMessageCount}/20 today
+                  {todayMessageCount}/20
                 </span>
               </motion.div>
             )}
@@ -729,7 +735,7 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="px-3 py-1 bg-gradient-to-r from-amber-400/20 to-yellow-400/20 backdrop-blur-md rounded-full border border-amber-400/40"
+                className="hidden sm:flex px-2 sm:px-3 py-1 bg-gradient-to-r from-amber-400/20 to-yellow-400/20 backdrop-blur-md rounded-full border border-amber-400/40"
               >
                 <span className="text-xs font-semibold text-amber-200">
                   ✨ Premium
@@ -738,12 +744,12 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <motion.button
             onClick={() => setShowAllTranslations(!showAllTranslations)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-colors flex-shrink-0 border ${
+            className={`p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl transition-colors flex-shrink-0 border ${
               showAllTranslations
                 ? 'text-white bg-gradient-to-r from-blue-500 to-cyan-500 border-blue-400'
                 : 'text-white bg-white/10 hover:bg-white/20 border-white/20'
@@ -758,27 +764,27 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
             onClick={() => setShowNotes(!showNotes)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 rounded-xl transition-colors flex-shrink-0 border border-white/20 flex items-center gap-1.5"
+            className="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-colors flex-shrink-0 border border-white/20 flex items-center gap-1.5"
           >
-            <StickyNote className="w-4 h-4" />
+            <StickyNote className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">My Notes</span>
           </motion.button>
           <motion.button
             onClick={() => setShowFeaturesPanel(true)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-white hover:bg-white/90 rounded-xl transition-colors flex-shrink-0 shadow-md flex items-center gap-1.5"
+            className="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-white hover:bg-white/90 rounded-lg sm:rounded-xl transition-colors flex-shrink-0 shadow-md flex items-center gap-1.5"
           >
-            <Sparkles className="w-4 h-4 text-purple-600" />
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600" />
             <span className="hidden sm:inline text-purple-600">Features</span>
           </motion.button>
           <motion.button
             onClick={() => setShowVocabPanel(true)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 rounded-xl transition-colors flex-shrink-0 border border-white/20 flex items-center gap-1.5"
+            className="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-colors flex-shrink-0 border border-white/20 flex items-center gap-1.5"
           >
-            <BookmarkCheck className="w-4 h-4" />
+            <BookmarkCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Vocab</span>
           </motion.button>
         </div>
