@@ -82,7 +82,7 @@ export default function ChatPage() {
   // Show loading while auth is loading OR while chat is loading
   if (authLoading || loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}

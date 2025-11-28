@@ -185,7 +185,7 @@ export default function Navbar({ onChatSelect, currentChatId, isMobileOpen, onMo
       <aside
         className={`
           flex flex-col text-white h-screen
-          bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 md:bg-white/10 md:backdrop-blur-sm md:border-r md:border-white/20
+          bg-gradient-to-br from-gray-900 via-slate-900 to-black md:bg-gray-900/90 md:backdrop-blur-sm md:border-r md:border-gray-700/50
           fixed md:relative z-[9999] md:z-auto top-0 left-0
           w-full
           transition-all duration-300 ease-out
@@ -195,7 +195,7 @@ export default function Navbar({ onChatSelect, currentChatId, isMobileOpen, onMo
         `}
       >
         {/* Header */}
-        <div className={`flex h-16 min-h-[4rem] items-center border-b border-white/20 px-4 ${isOpen ? 'justify-between' : 'justify-center'}`}>
+        <div className={`flex h-16 min-h-[4rem] items-center border-b border-gray-700/50 px-4 ${isOpen ? 'justify-between' : 'justify-center'}`}>
           {isOpen && (
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div
@@ -335,7 +335,7 @@ export default function Navbar({ onChatSelect, currentChatId, isMobileOpen, onMo
         </ScrollArea>
 
         {/* User Section with Glass Effect */}
-        <div className={`${!isOpen ? 'p-0' : 'p-4'}   border-t border-white/20 bg-white/10 backdrop-blur-md`}>
+        <div className={`${!isOpen ? 'p-0' : 'p-4'}   border-t border-gray-700/50 bg-gray-800/50 backdrop-blur-md`}>
           {isOpen ? (
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-semibold flex-shrink-0 text-base text-white">

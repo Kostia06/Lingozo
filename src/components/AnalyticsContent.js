@@ -114,7 +114,7 @@ export default function AnalyticsContent() {
   ] : [];
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black">
       {/* Navbar */}
       <Navbar
         currentChatId={selectedChatId}
@@ -139,13 +139,13 @@ export default function AnalyticsContent() {
         )}
 
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
+        <div className="bg-gray-900/80 backdrop-blur-md border-b border-gray-700/50 px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center gap-3 pl-12 md:pl-0">
             <div>
               <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Learning Analytics
               </h1>
-              <p className="text-gray-500 text-xs sm:text-sm mt-1">Track your progress and improvements</p>
+              <p className="text-gray-400 text-xs sm:text-sm mt-1">Track your progress and improvements</p>
             </div>
           </div>
         </div>
@@ -159,8 +159,8 @@ export default function AnalyticsContent() {
               className="flex items-center justify-center h-full"
             >
               <div className="text-center">
-                <Loader2 className="w-12 h-12 text-purple-600 animate-spin mx-auto mb-4" />
-                <p className="text-gray-600">Loading analytics...</p>
+                <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto mb-4" />
+                <p className="text-gray-300">Loading analytics...</p>
               </div>
             </motion.div>
           ) : !stats ? (
@@ -169,9 +169,9 @@ export default function AnalyticsContent() {
               animate={{ opacity: 1, y: 0 }}
               className="text-center py-12"
             >
-              <TrendingUp className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No Data Yet</h3>
-              <p className="text-gray-500">
+              <TrendingUp className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-300 mb-2">No Data Yet</h3>
+              <p className="text-gray-400">
                 Start chatting to see your learning analytics!
               </p>
             </motion.div>
@@ -186,14 +186,14 @@ export default function AnalyticsContent() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                     whileHover={{ scale: 1.05, y: -5 }}
-                    className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
+                    className="bg-gray-800/50 backdrop-blur-md rounded-xl p-4 border border-gray-700/50 shadow-sm"
                   >
                     <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center mb-3`}>
                       <stat.icon className="w-5 h-5 text-white" />
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                    <div className="text-xs text-gray-600 mb-2">{stat.label}</div>
-                    <div className="text-xs text-purple-600 font-medium">{stat.trend}</div>
+                    <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
+                    <div className="text-xs text-gray-400 mb-2">{stat.label}</div>
+                    <div className="text-xs text-purple-400 font-medium">{stat.trend}</div>
                   </motion.div>
                 ))}
               </div>
@@ -204,11 +204,11 @@ export default function AnalyticsContent() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
-                  className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200"
+                  className="bg-gray-800/50 backdrop-blur-md rounded-xl p-6 border border-purple-500/30"
                 >
                   <div className="flex items-center gap-2 mb-4">
-                    <Globe className="w-5 h-5 text-purple-600" />
-                    <h3 className="text-lg font-semibold text-gray-900">Languages Learning</h3>
+                    <Globe className="w-5 h-5 text-purple-400" />
+                    <h3 className="text-lg font-semibold text-white">Languages Learning</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {stats.languages_learning.map((lang, index) => (
@@ -217,7 +217,7 @@ export default function AnalyticsContent() {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.6 + index * 0.1 }}
-                        className="px-4 py-2 bg-white rounded-lg border border-purple-200 text-purple-700 font-medium"
+                        className="px-4 py-2 bg-purple-500/20 rounded-lg border border-purple-500/30 text-purple-300 font-medium"
                       >
                         {lang}
                       </motion.div>
@@ -255,7 +255,7 @@ export default function AnalyticsContent() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 }}
                 >
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-white mb-4">
                     Performance by Conversation
                   </h3>
                   <div className="space-y-3">
@@ -265,18 +265,18 @@ export default function AnalyticsContent() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.8 + index * 0.05 }}
-                        className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                        className="bg-gray-800/50 backdrop-blur-md rounded-xl p-4 border border-gray-700/50 shadow-sm cursor-pointer hover:shadow-md hover:border-purple-500/50 transition-all"
                         onClick={() => router.push(`/analytics?chat=${chat.chat_id}`)}
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div>
-                            <h4 className="font-semibold text-gray-900">
+                            <h4 className="font-semibold text-white">
                               {chat.chats?.title || 'Untitled Chat'}
                             </h4>
-                            <p className="text-sm text-gray-500">{chat.chats?.language}</p>
+                            <p className="text-sm text-gray-400">{chat.chats?.language}</p>
                           </div>
                           <div className="text-right">
-                            <div className="text-2xl font-bold text-purple-600">
+                            <div className="text-2xl font-bold text-purple-400">
                               {chat.accuracy_percentage || 100}%
                             </div>
                             <div className="text-xs text-gray-500">Accuracy</div>
@@ -284,19 +284,19 @@ export default function AnalyticsContent() {
                         </div>
                         <div className="grid grid-cols-3 gap-4 text-center">
                           <div>
-                            <div className="text-lg font-semibold text-gray-900">
+                            <div className="text-lg font-semibold text-white">
                               {chat.total_messages}
                             </div>
                             <div className="text-xs text-gray-500">Messages</div>
                           </div>
                           <div>
-                            <div className="text-lg font-semibold text-orange-600">
+                            <div className="text-lg font-semibold text-orange-400">
                               {chat.total_corrections}
                             </div>
                             <div className="text-xs text-gray-500">Corrections</div>
                           </div>
                           <div>
-                            <div className="text-lg font-semibold text-purple-600">
+                            <div className="text-lg font-semibold text-purple-400">
                               {chat.grammar_notes_received || 0}
                             </div>
                             <div className="text-xs text-gray-500">Grammar Notes</div>

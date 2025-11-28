@@ -617,7 +617,7 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
 
   if (!chatId) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 relative overflow-hidden p-4">
+      <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-slate-900 to-black relative overflow-hidden p-4">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
@@ -671,7 +671,7 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 relative overflow-hidden">
+    <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-900 via-slate-900 to-black relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -707,7 +707,7 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
       )}
 
       {/* Header with Glass Effect */}
-      <div className="bg-white/10 backdrop-blur-md border-b border-white/20 px-3 sm:px-6 py-2 sm:py-4 flex items-center justify-between gap-2 shadow-lg relative z-10">
+      <div className="bg-gray-900/80 backdrop-blur-md border-b border-gray-700/50 px-3 sm:px-6 py-2 sm:py-4 flex items-center justify-between gap-2 shadow-lg relative z-10">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           {/* Mobile: Add left padding to avoid hamburger overlap */}
           <div className="pl-12 md:pl-0 min-w-0 flex items-center gap-2 flex-1">
@@ -845,7 +845,7 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
           </div>
 
           {/* Input with Glass Effect */}
-          <div className="border-t border-white/20 px-3 sm:px-6 py-3 sm:py-4 bg-white/10 backdrop-blur-md shadow-lg">
+          <div className="border-t border-gray-700/50 px-3 sm:px-6 py-3 sm:py-4 bg-gray-900/80 backdrop-blur-md shadow-lg">
             {/* Reply Preview Banner */}
             <AnimatePresence>
               {replyingTo && (
@@ -853,7 +853,7 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="mb-3 px-3 py-2 bg-white/20 backdrop-blur-lg rounded-lg border-l-4 border-white/60 flex items-start justify-between gap-2"
+                  className="mb-3 px-3 py-2 bg-gray-800/50 backdrop-blur-lg rounded-lg border-l-4 border-purple-500/60 flex items-start justify-between gap-2"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-semibold text-white mb-1">
@@ -884,7 +884,7 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder={isListening ? 'Listening...' : `Type in ${language}...`}
                   disabled={loading}
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-12 border-2 border-white/30 bg-white/20 backdrop-blur-lg rounded-xl focus:outline-none focus:border-white/60 focus:ring-2 focus:ring-white/20 disabled:opacity-50 text-sm sm:text-base transition-all text-white placeholder:text-white/60 shadow-md"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-12 border-2 border-gray-600/50 bg-gray-800/80 backdrop-blur-lg rounded-xl focus:outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/30 disabled:opacity-50 text-sm sm:text-base transition-all text-white placeholder:text-gray-400 shadow-md"
                 />
                 {/* Microphone Button */}
                 {sttSupported && (
@@ -947,7 +947,7 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
 
         {/* Custom Notes Panel with Glass Effect */}
         {showNotes && (
-          <div className="hidden lg:block w-80 border-l border-white/20 overflow-y-auto bg-white/10 backdrop-blur-md relative z-10">
+          <div className="hidden lg:block w-80 border-l border-gray-700/50 overflow-y-auto bg-gray-900/80 backdrop-blur-md relative z-10">
             {/* Custom Notes Panel - Will be created next */}
             <CustomNotes chatId={chatId} language={language} />
           </div>
@@ -959,9 +959,9 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
             initial={{ opacity: 0, y: "100%" }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
-            className="lg:hidden fixed inset-0 bg-violet-600/95 backdrop-blur-xl z-50 overflow-y-auto"
+            className="lg:hidden fixed inset-0 bg-gray-900/95 backdrop-blur-xl z-50 overflow-y-auto"
           >
-            <div className="sticky top-0 bg-white/10 backdrop-blur-md border-b border-white/20 px-4 py-3 flex items-center justify-between shadow-lg">
+            <div className="sticky top-0 bg-gray-900/80 backdrop-blur-md border-b border-gray-700/50 px-4 py-3 flex items-center justify-between shadow-lg">
               <h3 className="font-semibold text-lg text-white">My Notes</h3>
               <button
                 onClick={() => setShowNotes(false)}

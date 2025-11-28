@@ -2,16 +2,6 @@
 @plugin "@tailwindcss/typography";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --card-bg: #ffffff;
-  --card-border: #e5e7eb;
-  --sidebar-bg: #f9fafb;
-  --input-bg: #ffffff;
-  --input-border: #d1d5db;
-}
-
-:root.dark {
   --background: #0a0a0a;
   --foreground: #ededed;
   --card-bg: #1a1a1a;
@@ -19,6 +9,16 @@
   --sidebar-bg: #0f0f0f;
   --input-bg: #1a1a1a;
   --input-border: #2a2a2a;
+}
+
+:root.light {
+  --background: #ffffff;
+  --foreground: #171717;
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --sidebar-bg: #f9fafb;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
 }
 
 @theme inline {

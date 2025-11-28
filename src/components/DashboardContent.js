@@ -5,6 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ChatInterface from '@/components/ChatInterface';
+import WelcomeGuide from '@/components/WelcomeGuide';
+import UIHighlights from '@/components/UIHighlights';
 import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
 import { MessageSquare, Plus, Clock, Loader2, Menu } from 'lucide-react';
@@ -143,14 +145,20 @@ export default function DashboardContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-slate-900 to-black">
         <Loader2 className="w-8 h-8 text-white animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 relative overflow-hidden">
+    <div className="flex h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black relative overflow-hidden">
+      {/* Welcome Guide */}
+      <WelcomeGuide />
+
+      {/* UI Highlights Tour - Only show when no chat is selected */}
+      <UIHighlights isVisible={!selectedChatId} />
+
       {/* Animated background elements - matching landing page */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div

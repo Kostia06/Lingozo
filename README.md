@@ -194,12 +194,55 @@ Lingozo is built with cutting-edge technology to provide the best learning exper
 
 ## Getting Started
 
+### Interactive Welcome Guide 🎓
+
+Lingozo includes a comprehensive interactive guide that appears automatically for new users:
+
+- **Step-by-step walkthrough** of all features
+- **Visual instructions** with icons and color coding
+- **Progressive disclosure** - learn at your own pace
+- **Reopenable anytime** - click the guide button in the bottom-right corner
+- **6 detailed sections** covering everything from setup to advanced features
+
+The guide covers:
+1. Welcome & Introduction to Lingozo
+2. Setting up your AI provider (required first step)
+3. Starting your first conversation
+4. Learning features (grammar, vocabulary, quizzes)
+5. Interactive features (word translation, reactions, replies)
+6. Tips for success and best practices
+
+### UI Highlights Tour ✨
+
+In addition to the welcome guide, Lingozo features an interactive UI tour that highlights key interface elements:
+
+- **Visual spotlights** on important buttons and features
+- **Contextual tooltips** explaining what each element does
+- **Step-by-step navigation** through the dashboard
+- **Smart hiding** - automatically hides when you open a chat
+- **Smart restart button** - appears only if you skip the tour (not if you complete it)
+- **One-time completion** - button disappears permanently after finishing the tour
+
+The UI tour highlights:
+- **New Chat Button** - How to start conversations
+- **Settings** - Where to configure your AI provider (marked as required)
+- **Analytics** - Track your learning progress
+- **Grammar Notes** - View your corrections
+- **Saved Vocabulary** - Access your word collection
+
+**Tour Behavior:**
+- Skip the tour → Sparkle restart button appears for later
+- Complete the tour → Button disappears permanently (you're ready!)
+- Both guides work together to ensure you never feel lost while using Lingozo!
+
 ### Quick Start (3 Minutes)
 1. Visit the Lingozo website
 2. Sign up with your email
-3. Create your first conversation
-4. Choose your target language
-5. Start chatting!
+3. **Follow the Welcome Guide** that appears automatically
+4. Set up your AI provider (get a free API key)
+5. Create your first conversation
+6. Choose your target language
+7. Start chatting!
 
 ### Tips for Success
 - **Start simple:** Begin with basic greetings and everyday topics
