@@ -140,9 +140,7 @@ export async function POST(request) {
 
     const ai = createAIProvider(aiProvider, apiKey);
 
-    const proactivePrompt = `You are a friendly language learning assistant. The user is learning ${chatData.language}.
-
-${conversationHistory ? `Recent conversation:\n${conversationHistory}\n\n` : ''}
+    const systemPrompt = `You are a friendly language learning assistant. The user is learning ${chatData.language}.
 
 Send a SHORT, friendly proactive message to the user. Choose ONE of these types:
 1. A quick check-in asking how they're doing (in ${chatData.language})
@@ -159,7 +157,15 @@ IMPORTANT:
 
 Just send the message directly, no JSON format needed.`;
 
-    const response = await ai.generateResponse(proactivePrompt, []);
+    const userMessage = conversationHistory
+      ? `Based on our recent conversation, send me a friendly message:\n${conversationHistory}`
+      : `Send me a friendly check-in message in ${chatData.language}`;
+
+    const response = await ai.chat(
+      [{ role: 'user', content: userMessage }],
+      systemPrompt,
+      chatData.language
+    );
 
     // Save the proactive message
     const { data: savedMessage, error: saveError } = await supabase

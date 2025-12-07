@@ -24,7 +24,16 @@ export default function QuizComponent({
   const [answers, setAnswers] = useState([]);
 
   if (!quiz || !quiz.questions || quiz.questions.length === 0) {
-    return null;
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 shadow-xl text-center"
+      >
+        <Loader2 className="w-8 h-8 animate-spin text-purple-600 mx-auto mb-3" />
+        <p className="text-gray-600 dark:text-gray-400 text-sm">Loading quiz...</p>
+      </motion.div>
+    );
   }
 
   const question = quiz.questions[currentQuestion];
@@ -83,7 +92,7 @@ export default function QuizComponent({
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="p-6 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 shadow-xl"
+        className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 shadow-xl mx-2 sm:mx-0"
       >
         <div className="text-center">
           {/* Trophy Icon */}
@@ -91,34 +100,34 @@ export default function QuizComponent({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", delay: 0.2 }}
-            className={`w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br ${
+            className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br ${
               isPerfect ? 'from-yellow-400 to-orange-500' :
               isGood ? 'from-green-400 to-emerald-500' :
               'from-blue-400 to-cyan-500'
             } flex items-center justify-center`}
           >
-            <Trophy className="w-10 h-10 text-white" />
+            <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
           </motion.div>
 
           {/* Score */}
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
             {isPerfect ? '🎉 Perfect Score!' :
              isGood ? '👏 Great Job!' :
              '💪 Keep Practicing!'}
           </h3>
-          <p className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+          <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3 sm:mb-4">
             {score} / {quiz.questions.length}
           </p>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">
             You got {percentage}% correct!
           </p>
 
           {/* Detailed Results */}
-          <div className="space-y-2 mb-6 max-h-60 overflow-y-auto">
+          <div className="space-y-2 mb-4 sm:mb-6 max-h-48 sm:max-h-60 overflow-y-auto">
             {answers.map((answer, index) => (
               <div
                 key={index}
-                className={`p-3 rounded-lg text-left ${
+                className={`p-2 sm:p-3 rounded-lg text-left ${
                   answer.isCorrect
                     ? 'bg-green-500/10 border border-green-500/30'
                     : 'bg-red-500/10 border border-red-500/30'
@@ -126,16 +135,16 @@ export default function QuizComponent({
               >
                 <div className="flex items-start gap-2">
                   {answer.isCorrect ? (
-                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
                   ) : (
-                    <XCircle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                    <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
                       {answer.question}
                     </p>
                     {!answer.isCorrect && (
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mt-1">
                         Correct answer: {quiz.questions[index].options[answer.correct]}
                       </p>
                     )}
@@ -151,7 +160,7 @@ export default function QuizComponent({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onComplete}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+              className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
             >
               Continue Learning
             </motion.button>
@@ -167,19 +176,19 @@ export default function QuizComponent({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="p-6 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 shadow-xl"
+      className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 shadow-xl mx-2 sm:mx-0"
     >
       {/* Progress Bar */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
             Question {currentQuestion + 1} of {quiz.questions.length}
           </span>
-          <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">
+          <span className="text-xs sm:text-sm font-semibold text-purple-600 dark:text-purple-400">
             Score: {score}
           </span>
         </div>
-        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
@@ -189,19 +198,19 @@ export default function QuizComponent({
       </div>
 
       {/* Question */}
-      <div className="mb-6">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+      <div className="mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white mb-2">
           {question.question}
         </h3>
         {question.hint && (
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
             💡 {question.hint}
           </p>
         )}
       </div>
 
       {/* Options */}
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {question.options.map((option, index) => (
           <motion.button
             key={index}
@@ -209,19 +218,19 @@ export default function QuizComponent({
             whileTap={selectedAnswer === null ? { scale: 0.98 } : {}}
             onClick={() => handleAnswer(index)}
             disabled={selectedAnswer !== null}
-            className={`w-full p-4 rounded-xl border-2 backdrop-blur-lg text-left transition-all ${getAnswerClassName(index)} ${
+            className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 backdrop-blur-lg text-left transition-all ${getAnswerClassName(index)} ${
               selectedAnswer !== null ? 'cursor-not-allowed' : 'cursor-pointer'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="font-medium">{option}</span>
+              <span className="font-medium text-sm sm:text-base">{option}</span>
               {selectedAnswer !== null && (
                 <>
                   {index === question.correctAnswer && (
-                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                   )}
                   {index === selectedAnswer && index !== question.correctAnswer && (
-                    <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                    <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
                   )}
                 </>
               )}
@@ -235,9 +244,9 @@ export default function QuizComponent({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-4 p-4 rounded-xl bg-blue-500/10 border border-blue-500/30"
+          className="mt-3 sm:mt-4 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-blue-500/10 border border-blue-500/30"
         >
-          <p className="text-sm text-gray-700 dark:text-gray-300">
+          <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
             <strong>💡 Explanation:</strong> {question.explanation}
           </p>
         </motion.div>

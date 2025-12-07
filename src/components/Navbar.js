@@ -139,9 +139,16 @@ export default function Navbar({ onChatSelect, currentChatId, isMobileOpen, onMo
 
       if (error) throw error;
 
+      // Add new chat to state immediately for instant UI update
+      setChats(prevChats => [data, ...prevChats]);
+
       setShowNewChatModal(false);
       setNewChatTitle("");
       setNewChatLanguage("");
+
+      // Close mobile menu if open
+      if (onMobileClose) onMobileClose();
+
       // Navigate to dashboard with query parameter
       router.push(`/dashboard?chat=${data.id}`, { scroll: false });
     } catch (error) {
@@ -187,7 +194,7 @@ export default function Navbar({ onChatSelect, currentChatId, isMobileOpen, onMo
           flex flex-col text-white h-screen
           bg-gradient-to-br from-gray-900 via-slate-900 to-black md:bg-gray-900/90 md:backdrop-blur-sm md:border-r md:border-gray-700/50
           fixed md:relative z-[9999] md:z-auto top-0 left-0
-          w-full
+          w-[280px] max-w-[85vw]
           transition-all duration-300 ease-out
           ${isMobileOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 md:translate-x-0 md:opacity-100'}
           md:transition-[width] md:duration-300

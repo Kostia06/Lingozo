@@ -151,13 +151,16 @@ export default function WelcomeGuide() {
         <motion.button
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 p-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full shadow-2xl hover:shadow-purple-500/50 transition-all group"
-          title="Open Guide"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[50] p-3 sm:p-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full shadow-2xl hover:shadow-purple-500/50 transition-all"
+          title="Open Welcome Guide"
+          aria-label="Open Welcome Guide"
         >
-          <BookOpen className="w-6 h-6 text-white" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+          <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse" />
         </motion.button>
       )}
 
@@ -175,31 +178,32 @@ export default function WelcomeGuide() {
             />
 
             {/* Guide Content */}
-            <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+            <div className="fixed inset-0 z-[101] flex items-center justify-center p-3 sm:p-4 pointer-events-none">
               <motion.div
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="bg-gray-900/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border border-gray-700/50 pointer-events-auto"
+                className="bg-gray-900/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border border-gray-700/50 pointer-events-auto"
               >
                 {/* Header */}
-                <div className={`relative bg-gradient-to-r ${currentGuide.color} p-6`}>
+                <div className={`relative bg-gradient-to-r ${currentGuide.color} p-4 sm:p-6`}>
                   <button
                     onClick={handleClose}
-                    className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors"
+                    className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 sm:p-2 hover:bg-white/20 rounded-full transition-colors"
+                    aria-label="Close guide"
                   >
-                    <X className="w-5 h-5 text-white" />
+                    <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </button>
 
-                  <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center flex-shrink-0">
-                      <Icon className="w-8 h-8 text-white" />
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-md rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                     </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-white mb-1">
+                    <div className="flex-1 pr-6">
+                      <h2 className="text-lg sm:text-2xl font-bold text-white mb-0.5 sm:mb-1">
                         {currentGuide.title}
                       </h2>
-                      <p className="text-white/90 text-sm">
+                      <p className="text-white/90 text-xs sm:text-sm">
                         {currentGuide.description}
                       </p>
                     </div>
@@ -217,7 +221,7 @@ export default function WelcomeGuide() {
                 </div>
 
                 {/* Content */}
-                <div className="p-6 overflow-y-auto max-h-[50vh]">
+                <div className="p-4 sm:p-6 overflow-y-auto max-h-[50vh] custom-scrollbar">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={currentStep}
@@ -227,25 +231,25 @@ export default function WelcomeGuide() {
                       transition={{ duration: 0.2 }}
                     >
                       {currentGuide.highlight && (
-                        <div className="mb-4 p-3 bg-amber-500/20 border border-amber-500/30 rounded-xl">
-                          <p className="text-amber-200 text-sm font-semibold flex items-center gap-2">
-                            <Sparkles className="w-4 h-4" />
+                        <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-amber-500/20 border border-amber-500/30 rounded-lg sm:rounded-xl">
+                          <p className="text-amber-200 text-xs sm:text-sm font-semibold flex items-center gap-2">
+                            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             {currentGuide.highlight}
                           </p>
                         </div>
                       )}
 
-                      <ul className="space-y-3">
+                      <ul className="space-y-2.5 sm:space-y-3">
                         {currentGuide.content.map((item, index) => (
                           <motion.li
                             key={index}
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="flex items-start gap-3 text-gray-200"
+                            className="flex items-start gap-2.5 sm:gap-3 text-gray-200"
                           >
                             <div className={`mt-1 w-1.5 h-1.5 rounded-full bg-gradient-to-r ${currentGuide.color} flex-shrink-0`} />
-                            <span className="text-sm leading-relaxed">{item}</span>
+                            <span className="text-xs sm:text-sm leading-relaxed">{item}</span>
                           </motion.li>
                         ))}
                       </ul>
@@ -254,55 +258,57 @@ export default function WelcomeGuide() {
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-gray-700/50 bg-gray-800/50">
-                  <div className="flex items-center justify-between gap-4">
+                <div className="p-3 sm:p-6 border-t border-gray-700/50 bg-gray-800/50">
+                  <div className="flex items-center justify-between gap-2 sm:gap-4">
                     {/* Step Indicator */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       {GUIDE_STEPS.map((_, index) => (
                         <button
                           key={index}
                           onClick={() => setCurrentStep(index)}
-                          className={`w-2 h-2 rounded-full transition-all ${
+                          className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all ${
                             index === currentStep
-                              ? 'bg-purple-500 w-6'
+                              ? 'bg-purple-500 w-4 sm:w-6'
                               : 'bg-gray-600 hover:bg-gray-500'
                           }`}
+                          aria-label={`Go to step ${index + 1}`}
                         />
                       ))}
                     </div>
 
                     {/* Navigation Buttons */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       {currentStep === 0 ? (
                         <button
                           onClick={handleSkip}
-                          className="px-4 py-2 text-gray-400 hover:text-gray-200 transition-colors text-sm font-medium"
+                          className="px-3 sm:px-4 py-1.5 sm:py-2 text-gray-400 hover:text-gray-200 transition-colors text-xs sm:text-sm font-medium"
                         >
                           Skip
                         </button>
                       ) : (
                         <button
                           onClick={handlePrev}
-                          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-xl transition-colors flex items-center gap-2 text-white"
+                          className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 rounded-lg sm:rounded-xl transition-colors flex items-center gap-1.5 text-white text-xs sm:text-sm"
                         >
-                          <ChevronLeft className="w-4 h-4" />
-                          Back
+                          <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          <span className="hidden sm:inline">Back</span>
                         </button>
                       )}
 
                       <button
                         onClick={handleNext}
-                        className={`px-6 py-2 bg-gradient-to-r ${currentGuide.color} rounded-xl font-semibold transition-all flex items-center gap-2 text-white hover:shadow-lg`}
+                        className={`px-4 sm:px-6 py-1.5 sm:py-2 bg-gradient-to-r ${currentGuide.color} rounded-lg sm:rounded-xl font-semibold transition-all flex items-center gap-1.5 text-white hover:shadow-lg text-xs sm:text-sm`}
                       >
                         {currentStep === GUIDE_STEPS.length - 1 ? (
                           <>
-                            Get Started
-                            <CheckCircle className="w-4 h-4" />
+                            <span className="hidden sm:inline">Get Started</span>
+                            <span className="sm:hidden">Start</span>
+                            <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </>
                         ) : (
                           <>
                             Next
-                            <ChevronRight className="w-4 h-4" />
+                            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </>
                         )}
                       </button>

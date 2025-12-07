@@ -8,8 +8,13 @@ import ChatInterface from '@/components/ChatInterface';
 import WelcomeGuide from '@/components/WelcomeGuide';
 import UIHighlights from '@/components/UIHighlights';
 import { supabase } from '@/lib/supabase';
-import { motion } from 'framer-motion';
-import { MessageSquare, Plus, Clock, Loader2, Menu } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageSquare, Plus, Clock, Loader2, Menu, Sparkles } from 'lucide-react';
+import { MagicCard } from '@/components/ui/magic-card';
+import { Particles } from '@/components/ui/particles';
+import { BlurFade } from '@/components/ui/blur-fade';
+import { ShimmerButton } from '@/components/ui/shimmer-button';
+import { ShineBorder } from '@/components/ui/shine-border';
 
 export default function DashboardContent() {
   const { user, loading } = useAuth();
@@ -132,11 +137,19 @@ export default function DashboardContent() {
 
       if (error) throw error;
 
-      // Select the new chat with query parameter
-      router.push(`/dashboard?chat=${data.id}`);
+      // Add new chat to state immediately for instant UI update
+      setChats(prevChats => [data, ...prevChats]);
+
+      // Set selected chat directly for instant navigation
+      setSelectedChat(data);
+
+      // Close modal and reset form
       setShowNewChatModal(false);
       setNewChatTitle('');
       setNewChatLanguage('');
+
+      // Update URL without full page reload
+      router.push(`/dashboard?chat=${data.id}`, { scroll: false });
     } catch (error) {
       console.error('Error creating chat:', error);
       alert('Failed to create chat');
@@ -159,23 +172,44 @@ export default function DashboardContent() {
       {/* UI Highlights Tour - Only show when no chat is selected */}
       <UIHighlights isVisible={!selectedChatId} />
 
+      {/* Particles Background */}
+      <Particles
+        className="absolute inset-0 z-0"
+        quantity={80}
+        staticity={40}
+        ease={70}
+        color="#a855f7"
+        size={0.5}
+      />
+
       {/* Animated background elements - matching landing page */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 90, 0],
+            scale: [1, 1.3, 1],
+            rotate: [0, 180, 360],
+            opacity: [0.2, 0.4, 0.2],
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/5 to-transparent rounded-full blur-3xl"
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-600/15 to-transparent rounded-full blur-3xl"
         />
         <motion.div
           animate={{
-            scale: [1.2, 1, 1.2],
-            rotate: [90, 0, 90],
+            scale: [1.3, 1, 1.3],
+            rotate: [180, 360, 180],
+            opacity: [0.15, 0.3, 0.15],
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-white/5 to-transparent rounded-full blur-3xl"
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-violet-600/15 to-transparent rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            x: [0, 80, 0],
+            y: [0, -40, 0],
+            opacity: [0.1, 0.25, 0.1],
+          }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/3 right-1/3 w-80 h-80 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-full blur-3xl"
         />
       </div>
 
@@ -214,49 +248,58 @@ export default function DashboardContent() {
           )}
 
           {/* Header with Glass Effect */}
-          <div className="bg-white/10 backdrop-blur-md border-b border-white/20 px-4 sm:px-6 py-3 sm:py-4 shadow-lg">
+          <div className="bg-white/10 backdrop-blur-xl border-b border-white/20 px-4 sm:px-6 py-3 sm:py-4 shadow-lg">
             <div className="flex items-center justify-between">
               <div className="flex-1 pl-12 md:pl-0">
-                <div className="flex items-center gap-3">
-                  <h1 className="text-lg sm:text-2xl font-bold text-white">
-                    My Conversations
-                  </h1>
-                  {!isPremium && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/30"
-                    >
-                      <span className="text-xs font-semibold text-white">
-                        {chats.length}/5 chats
-                      </span>
-                    </motion.div>
-                  )}
-                  {isPremium && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="px-3 py-1 bg-gradient-to-r from-amber-400/20 to-yellow-400/20 backdrop-blur-md rounded-full border border-amber-400/40"
-                    >
-                      <span className="text-xs font-semibold text-amber-200">
-                        ✨ Premium - Unlimited
-                      </span>
-                    </motion.div>
-                  )}
-                </div>
-                <p className="text-white/80 text-xs sm:text-sm mt-1">
-                  Choose a conversation or start a new one
-                </p>
+                <BlurFade delay={0.1} inView>
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-lg sm:text-2xl font-bold text-white">
+                      My Conversations
+                    </h1>
+                    {!isPremium && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/30"
+                      >
+                        <span className="text-xs font-semibold text-white">
+                          {chats.length}/5 chats
+                        </span>
+                      </motion.div>
+                    )}
+                    {isPremium && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="px-3 py-1 bg-gradient-to-r from-amber-400/20 to-yellow-400/20 backdrop-blur-md rounded-full border border-amber-400/40"
+                      >
+                        <span className="text-xs font-semibold text-amber-200">
+                          ✨ Premium - Unlimited
+                        </span>
+                      </motion.div>
+                    )}
+                  </div>
+                </BlurFade>
+                <BlurFade delay={0.2} inView>
+                  <p className="text-white/80 text-xs sm:text-sm mt-1">
+                    Choose a conversation or start a new one
+                  </p>
+                </BlurFade>
               </div>
-              <motion.button
-                onClick={() => setShowNewChatModal(true)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-4 py-2 bg-white text-purple-600 rounded-xl font-semibold hover:shadow-lg shadow-md transition-all"
-              >
-                <Plus className="w-5 h-5" />
-                <span className="hidden sm:inline">New Chat</span>
-              </motion.button>
+              <BlurFade delay={0.3} inView>
+                <ShimmerButton
+                  onClick={() => setShowNewChatModal(true)}
+                  shimmerColor="#ffffff"
+                  shimmerSize="0.08em"
+                  borderRadius="12px"
+                  shimmerDuration="2.5s"
+                  background="linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #7c3aed 100%)"
+                  className="px-4 py-2 font-semibold shadow-lg shadow-purple-500/30"
+                >
+                  <Plus className="w-5 h-5 mr-1" />
+                  <span className="hidden sm:inline">New Chat</span>
+                </ShimmerButton>
+              </BlurFade>
             </div>
           </div>
 
@@ -267,62 +310,86 @@ export default function DashboardContent() {
               <Loader2 className="w-8 h-8 text-white animate-spin" />
             </div>
           ) : chats.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center py-12"
-            >
-              <MessageSquare className="w-16 h-16 text-white/40 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No conversations yet</h3>
-              <p className="text-white/70 mb-6">
-                Start your first conversation to begin learning!
-              </p>
-              <motion.button
-                onClick={() => setShowNewChatModal(true)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white text-purple-600 rounded-xl font-semibold hover:shadow-lg transition-all shadow-white/20"
+            <BlurFade delay={0.2} inView>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-12"
               >
-                <Plus className="w-5 h-5" />
-                Start First Conversation
-              </motion.button>
-            </motion.div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
-              {chats.map((chat, index) => (
                 <motion.div
-                  key={chat.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  onClick={() => router.push(`/dashboard?chat=${chat.id}`)}
-                  className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/40 shadow-lg cursor-pointer hover:shadow-xl transition-all"
+                  animate={{
+                    y: [0, -10, 0],
+                    rotate: [0, 5, -5, 0],
+                  }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-white text-lg mb-1 truncate">
-                        {chat.title}
-                      </h3>
-                      <p className="text-sm text-white/80 font-medium">
-                        {chat.language}
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                      <MessageSquare className="w-6 h-6 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-white/60 mt-4">
-                    <Clock className="w-4 h-4" />
-                    <span>
-                      {new Date(chat.updated_at).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </span>
-                  </div>
+                  <MessageSquare className="w-20 h-20 text-purple-400/60 mx-auto mb-6" />
                 </motion.div>
+                <h3 className="text-2xl font-bold text-white mb-3">No conversations yet</h3>
+                <p className="text-white/70 mb-8 max-w-md mx-auto">
+                  Start your first conversation to begin your language learning journey!
+                </p>
+                <ShimmerButton
+                  onClick={() => setShowNewChatModal(true)}
+                  shimmerColor="#ffffff"
+                  shimmerSize="0.1em"
+                  borderRadius="16px"
+                  shimmerDuration="2s"
+                  background="linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #7c3aed 100%)"
+                  className="px-8 py-4 text-lg font-semibold shadow-2xl shadow-purple-500/40"
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Start First Conversation
+                </ShimmerButton>
+              </motion.div>
+            </BlurFade>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-7xl mx-auto">
+              {chats.map((chat, index) => (
+                <BlurFade key={chat.id} delay={0.1 + index * 0.05} inView>
+                  <MagicCard
+                    className="rounded-2xl cursor-pointer h-full"
+                    gradientColor="rgba(168, 85, 247, 0.12)"
+                    gradientFrom="#a855f7"
+                    gradientTo="#6366f1"
+                  >
+                    <motion.div
+                      whileHover={{ y: -4 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                      onClick={() => router.push(`/dashboard?chat=${chat.id}`)}
+                      className="p-6 h-full"
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-white text-lg mb-1.5 truncate">
+                            {chat.title}
+                          </h3>
+                          <p className="text-sm text-purple-300 font-medium">
+                            {chat.language}
+                          </p>
+                        </div>
+                        <motion.div
+                          className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/30"
+                          whileHover={{ rotate: 10, scale: 1.1 }}
+                          transition={{ type: "spring", stiffness: 400 }}
+                        >
+                          <MessageSquare className="w-6 h-6 text-white" />
+                        </motion.div>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-white/50 mt-4 pt-4 border-t border-white/10">
+                        <Clock className="w-4 h-4" />
+                        <span>
+                          {new Date(chat.updated_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                    </motion.div>
+                  </MagicCard>
+                </BlurFade>
               ))}
             </div>
           )}
@@ -331,83 +398,107 @@ export default function DashboardContent() {
       )}
 
       {/* New Chat Modal */}
-      {showNewChatModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4"
-          onClick={() => {
-            setShowNewChatModal(false);
-            setNewChatTitle('');
-            setNewChatLanguage('');
-          }}
-        >
+      <AnimatePresence>
+        {showNewChatModal && (
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/20 dark:border-gray-700/20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-50 p-4"
+            onClick={() => {
+              setShowNewChatModal(false);
+              setNewChatTitle('');
+              setNewChatLanguage('');
+            }}
           >
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text text-transparent mb-6">
-              Start New Conversation
-            </h3>
-            <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Conversation Title
-                </label>
-                <input
-                  type="text"
-                  value={newChatTitle}
-                  onChange={(e) => setNewChatTitle(e.target.value)}
-                  placeholder="e.g., Spanish Practice"
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                  autoFocus
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 30 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative rounded-3xl overflow-hidden w-full max-w-md">
+                <ShineBorder
+                  shineColor={["#a855f7", "#6366f1", "#ec4899"]}
+                  borderWidth={2}
+                  duration={10}
                 />
+                <div className="bg-gray-900/95 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 w-full shadow-2xl">
+                  <div className="flex items-center gap-3 mb-6">
+                    <motion.div
+                      className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg"
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <Sparkles className="w-6 h-6 text-white" />
+                    </motion.div>
+                    <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
+                      Start New Conversation
+                    </h3>
+                  </div>
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-sm font-semibold text-white/80 mb-2">
+                        Conversation Title
+                      </label>
+                      <input
+                        type="text"
+                        value={newChatTitle}
+                        onChange={(e) => setNewChatTitle(e.target.value)}
+                        placeholder="e.g., Spanish Practice"
+                        className="w-full px-4 py-3 text-sm border-2 border-white/10 bg-white/5 backdrop-blur-lg rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 hover:border-white/20 transition-all text-white placeholder:text-white/40"
+                        autoFocus
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-white/80 mb-2">
+                        What Language Do You Want to Learn?
+                      </label>
+                      <input
+                        type="text"
+                        value={newChatLanguage}
+                        onChange={(e) => setNewChatLanguage(e.target.value)}
+                        placeholder="e.g., Spanish, French, Japanese..."
+                        className="w-full px-4 py-3 text-sm border-2 border-white/10 bg-white/5 backdrop-blur-lg rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 hover:border-white/20 transition-all text-white placeholder:text-white/40"
+                      />
+                      <p className="text-xs text-white/50 mt-2">
+                        Enter any language you'd like to practice conversationally
+                      </p>
+                    </div>
+                    <div className="flex gap-3 pt-3">
+                      <ShimmerButton
+                        onClick={handleNewChat}
+                        shimmerColor="#ffffff"
+                        shimmerSize="0.1em"
+                        borderRadius="12px"
+                        shimmerDuration="2s"
+                        background="linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #7c3aed 100%)"
+                        className="flex-1 py-3 font-semibold shadow-lg shadow-purple-500/30"
+                      >
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Create
+                      </ShimmerButton>
+                      <motion.button
+                        onClick={() => {
+                          setShowNewChatModal(false);
+                          setNewChatTitle('');
+                          setNewChatLanguage('');
+                        }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="px-6 py-3 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white/80 transition-all border border-white/10"
+                      >
+                        Cancel
+                      </motion.button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  What Language Do You Want to Learn?
-                </label>
-                <input
-                  type="text"
-                  value={newChatLanguage}
-                  onChange={(e) => setNewChatLanguage(e.target.value)}
-                  placeholder="e.g., Spanish, French, Japanese..."
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-purple-500 transition-colors text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Enter any language you'd like to practice conversationally
-                </p>
-              </div>
-              <div className="flex gap-3 pt-2">
-                <motion.button
-                  onClick={handleNewChat}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-violet-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
-                >
-                  Create
-                </motion.button>
-                <motion.button
-                  onClick={() => {
-                    setShowNewChatModal(false);
-                    setNewChatTitle('');
-                    setNewChatLanguage('');
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-6 py-3 rounded-xl font-semibold bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-all"
-                >
-                  Cancel
-                </motion.button>
-              </div>
-            </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }

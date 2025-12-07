@@ -8,9 +8,13 @@ import MusicCard from './MusicCard';
 import FeaturesPanel from './FeaturesPanel';
 import QuizComponent from './QuizComponent';
 import SavedVocab from './SavedVocab';
-import { Menu, Send, Loader2, Mic, MicOff, Sparkles, BookmarkCheck, X, StickyNote } from 'lucide-react';
+import { Menu, Send, Loader2, Mic, MicOff, Sparkles, BookmarkCheck, X, StickyNote, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { startListening, isSTTSupported } from '@/lib/audio-utils';
+import { Particles } from '@/components/ui/particles';
+import { BlurFade } from '@/components/ui/blur-fade';
+import { ShimmerButton } from '@/components/ui/shimmer-button';
+import { BorderBeam } from '@/components/ui/border-beam';
 
 export default function ChatInterface({ chatId, language, onMenuClick }) {
   const [messages, setMessages] = useState([]);
@@ -48,7 +52,6 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
       // Verify session before loading
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        console.warn('No session available, skipping chat initialization');
         return;
       }
 
@@ -235,7 +238,6 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
       const data = await response.json();
 
       if (data.shouldSend && data.message) {
-        console.log('✨ Proactive message sent:', data.message.content);
         // Message will appear via real-time subscription
       }
     } catch (error) {
@@ -244,8 +246,6 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
   };
 
   const subscribeToMessages = () => {
-    console.log('Setting up subscription for chat:', chatId);
-
     const channel = supabase.channel(`chat-${chatId}-${Date.now()}`, {
       config: {
         broadcast: { self: true },
@@ -263,8 +263,6 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
           filter: `chat_id=eq.${chatId}`,
         },
         (payload) => {
-          console.log('📨 New message received:', payload.new.role, payload.new.content?.substring(0, 30));
-
           // Check if message contains feature data (quiz, challenge, etc.)
           try {
             const content = payload.new.content;
@@ -287,7 +285,6 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
             // Check if message already exists (avoid duplicates)
             const exists = prev.some(msg => msg.id === payload.new.id);
             if (exists) {
-              console.log('⚠️ Message already exists, skipping');
               return prev;
             }
 
@@ -297,7 +294,6 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
               return msg.role !== payload.new.role;
             });
 
-            console.log('✅ Adding new message to UI');
             return [...filtered, payload.new];
           });
         }
@@ -311,7 +307,6 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
           filter: `chat_id=eq.${chatId}`,
         },
         (payload) => {
-          console.log('📝 Message updated:', payload.new.id);
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === payload.new.id ? payload.new : msg
@@ -328,7 +323,6 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
           filter: `chat_id=eq.${chatId}`,
         },
         (payload) => {
-          console.log('🎵 New music recommendation received:', payload.new.title);
           setMusicRecommendations((prev) => {
             const exists = prev.some(music => music.id === payload.new.id);
             if (exists) return prev;
@@ -340,18 +334,24 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
         if (err) {
           console.error('❌ Subscription error:', err);
         }
-        console.log('📡 Subscription status:', status);
       });
 
     return () => {
-      console.log('🧹 Cleaning up subscription for chat:', chatId);
       supabase.removeChannel(channel);
     };
   };
 
   const handleFeatureSelect = async (featureId) => {
+    // For tea-time, just set the active feature and stay in normal chat
+    if (featureId === 'tea-time') {
+      setActiveFeature(featureId);
+      setLoading(false);
+      return;
+    }
+
     setActiveFeature(featureId);
     setLoading(true);
+    setFeatureData(null);
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -375,13 +375,52 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
         throw new Error('Failed to start feature');
       }
 
-      // Feature responses will come through real-time subscription
-      // We'll process them based on type
+      // Wait a moment for the message to be processed and saved
+      // Then check for the feature data in recent messages
+      setTimeout(async () => {
+        try {
+          const { data: recentMessages } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('chat_id', chatId)
+            .eq('role', 'assistant')
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          if (recentMessages && recentMessages.length > 0) {
+            const content = recentMessages[0].content;
+            // Try to parse JSON from the message content
+            try {
+              const jsonMatch = content.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                const parsed = JSON.parse(jsonMatch[0]);
+                if (parsed.type === 'quiz' || parsed.questions) {
+                  setFeatureData({
+                    type: 'quiz',
+                    quizType: parsed.quizType || 'vocabulary',
+                    questions: parsed.questions
+                  });
+                  setLoading(false);
+                  return;
+                }
+              }
+            } catch (e) {
+              console.log('Message is not a feature response');
+            }
+          }
+          // If no quiz data found, show in chat
+          setActiveFeature(null);
+          setLoading(false);
+        } catch (err) {
+          console.error('Error checking for feature data:', err);
+          setActiveFeature(null);
+          setLoading(false);
+        }
+      }, 2000);
     } catch (error) {
       console.error('Error starting feature:', error);
       alert('Failed to start feature. Please try again.');
       setActiveFeature(null);
-    } finally {
       setLoading(false);
     }
   };
@@ -477,7 +516,6 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
         setMessages((prev) => {
           const hasTempMessages = prev.some(msg => msg.id.startsWith('temp-'));
           if (hasTempMessages) {
-            console.log('⚠️ Real-time didn\'t fire, reloading messages manually');
             loadMessages();
           }
           return prev;
@@ -618,23 +656,35 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
   if (!chatId) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-slate-900 to-black relative overflow-hidden p-4">
+        {/* Particles Background */}
+        <Particles
+          className="absolute inset-0 z-0"
+          quantity={60}
+          staticity={40}
+          ease={80}
+          color="#a855f7"
+          size={0.5}
+        />
+
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
             animate={{
-              scale: [1, 1.2, 1],
-              rotate: [0, 90, 0],
+              scale: [1, 1.3, 1],
+              rotate: [0, 180, 360],
+              opacity: [0.2, 0.4, 0.2],
             }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/5 to-transparent rounded-full blur-3xl"
+            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-600/20 to-transparent rounded-full blur-3xl"
           />
           <motion.div
             animate={{
-              scale: [1.2, 1, 1.2],
-              rotate: [90, 0, 90],
+              scale: [1.3, 1, 1.3],
+              rotate: [180, 360, 180],
+              opacity: [0.15, 0.35, 0.15],
             }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-white/5 to-transparent rounded-full blur-3xl"
+            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-violet-600/20 to-transparent rounded-full blur-3xl"
           />
         </div>
 
@@ -652,19 +702,35 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
           </motion.button>
         )}
         <div className="text-center max-w-md relative z-10">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="w-20 h-20 mx-auto mb-6 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-xl border border-white/20"
-          >
-            <span className="text-4xl">💬</span>
-          </motion.div>
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-            Welcome to Lingozo
-          </h2>
-          <p className="text-white/80 text-sm md:text-base">
-            Select a conversation or create a new one to start learning with AI
-          </p>
+          <BlurFade delay={0.1} inView>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="w-24 h-24 mx-auto mb-8 relative"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-violet-600/30 rounded-3xl blur-xl" />
+              <motion.div
+                animate={{
+                  y: [0, -8, 0],
+                  rotate: [0, 5, -5, 0],
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="relative w-full h-full bg-gradient-to-br from-purple-500/20 to-violet-600/20 backdrop-blur-xl rounded-3xl flex items-center justify-center shadow-2xl border border-purple-400/30"
+              >
+                <span className="text-5xl">💬</span>
+              </motion.div>
+            </motion.div>
+          </BlurFade>
+          <BlurFade delay={0.2} inView>
+            <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">
+              Welcome to <span className="bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">Lingozo</span>
+            </h2>
+          </BlurFade>
+          <BlurFade delay={0.3} inView>
+            <p className="text-white/70 text-sm md:text-lg max-w-sm mx-auto leading-relaxed">
+              Select a conversation or create a new one to start learning with AI
+            </p>
+          </BlurFade>
         </div>
       </div>
     );
@@ -672,23 +738,35 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
 
   return (
     <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-900 via-slate-900 to-black relative overflow-hidden">
+      {/* Particles Background - subtle in chat */}
+      <Particles
+        className="absolute inset-0 z-0 opacity-50"
+        quantity={40}
+        staticity={50}
+        ease={90}
+        color="#a855f7"
+        size={0.4}
+      />
+
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           animate={{
             scale: [1, 1.2, 1],
             rotate: [0, 90, 0],
+            opacity: [0.15, 0.25, 0.15],
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/5 to-transparent rounded-full blur-3xl"
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-600/15 to-transparent rounded-full blur-3xl"
         />
         <motion.div
           animate={{
             scale: [1.2, 1, 1.2],
             rotate: [90, 0, 90],
+            opacity: [0.1, 0.2, 0.1],
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-white/5 to-transparent rounded-full blur-3xl"
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-violet-600/15 to-transparent rounded-full blur-3xl"
         />
       </div>
 
@@ -747,12 +825,13 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
         <div className="flex items-center gap-1 sm:gap-2">
           <motion.button
             onClick={() => setShowAllTranslations(!showAllTranslations)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl transition-colors flex-shrink-0 border ${
+            whileHover={{ scale: 1.05, y: -1 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className={`p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl transition-all flex-shrink-0 border shadow-md ${
               showAllTranslations
-                ? 'text-white bg-gradient-to-r from-blue-500 to-cyan-500 border-blue-400'
-                : 'text-white bg-white/10 hover:bg-white/20 border-white/20'
+                ? 'text-white bg-gradient-to-r from-blue-500 to-cyan-500 border-blue-400 shadow-blue-500/30'
+                : 'text-white bg-white/10 hover:bg-white/20 border-white/20 hover:border-white/30'
             }`}
           >
             <span className="hidden sm:inline">
@@ -762,27 +841,30 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
           </motion.button>
           <motion.button
             onClick={() => setShowNotes(!showNotes)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-colors flex-shrink-0 border border-white/20 flex items-center gap-1.5"
+            whileHover={{ scale: 1.05, y: -1 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-all flex-shrink-0 border border-white/20 hover:border-white/30 flex items-center gap-1.5 shadow-md"
           >
             <StickyNote className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">My Notes</span>
           </motion.button>
           <motion.button
             onClick={() => setShowFeaturesPanel(true)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-white hover:bg-white/90 rounded-lg sm:rounded-xl transition-colors flex-shrink-0 shadow-md flex items-center gap-1.5"
+            whileHover={{ scale: 1.05, y: -1 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white rounded-lg sm:rounded-xl transition-all flex-shrink-0 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 flex items-center gap-1.5"
           >
-            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600" />
-            <span className="hidden sm:inline text-purple-600">Features</span>
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Features</span>
           </motion.button>
           <motion.button
             onClick={() => setShowVocabPanel(true)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-colors flex-shrink-0 border border-white/20 flex items-center gap-1.5"
+            whileHover={{ scale: 1.05, y: -1 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-all flex-shrink-0 border border-white/20 hover:border-white/30 flex items-center gap-1.5 shadow-md"
           >
             <BookmarkCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Vocab</span>
@@ -845,30 +927,65 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
           </div>
 
           {/* Input with Glass Effect */}
-          <div className="border-t border-gray-700/50 px-3 sm:px-6 py-3 sm:py-4 bg-gray-900/80 backdrop-blur-md shadow-lg">
+          <div className="border-t border-gray-700/50 px-3 sm:px-6 py-3 sm:py-4 bg-gray-900/90 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+            {/* Subtle gradient border effect */}
+            <div className={`absolute top-0 left-0 right-0 h-px ${
+              activeFeature === 'tea-time'
+                ? 'bg-gradient-to-r from-transparent via-amber-500/50 to-transparent'
+                : 'bg-gradient-to-r from-transparent via-purple-500/50 to-transparent'
+            }`} />
+
+            {/* Tea Time Mode Indicator */}
+            {activeFeature === 'tea-time' && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-3 px-4 py-2.5 bg-amber-500/10 backdrop-blur-lg rounded-xl border border-amber-500/30 flex items-center justify-between gap-2"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">☕</span>
+                  <span className="text-sm font-semibold text-amber-300">Tea Time Mode</span>
+                  <span className="text-xs text-amber-200/70">Share your stories!</span>
+                </div>
+                <motion.button
+                  onClick={() => setActiveFeature(null)}
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                  className="flex-shrink-0 p-1.5 hover:bg-white/20 rounded-lg transition-colors text-amber-300 hover:text-amber-100"
+                  title="Exit tea time"
+                >
+                  <X className="w-4 h-4" />
+                </motion.button>
+              </motion.div>
+            )}
+
             {/* Reply Preview Banner */}
             <AnimatePresence>
               {replyingTo && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mb-3 px-3 py-2 bg-gray-800/50 backdrop-blur-lg rounded-lg border-l-4 border-purple-500/60 flex items-start justify-between gap-2"
+                  initial={{ opacity: 0, height: 0, y: -10 }}
+                  animate={{ opacity: 1, height: 'auto', y: 0 }}
+                  exit={{ opacity: 0, height: 0, y: -10 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  className="mb-3 px-4 py-2.5 bg-purple-500/10 backdrop-blur-lg rounded-xl border border-purple-500/30 flex items-start justify-between gap-2"
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-white mb-1">
+                    <div className="text-xs font-semibold text-purple-300 mb-1 flex items-center gap-1.5">
+                      <Zap className="w-3 h-3" />
                       Replying to {replyingTo.role === 'user' ? 'yourself' : 'AI'}
                     </div>
-                    <div className="text-sm text-white/80 truncate">
+                    <div className="text-sm text-white/70 truncate">
                       {replyingTo.content.substring(0, 80)}
                       {replyingTo.content.length > 80 ? '...' : ''}
                     </div>
                   </div>
                   <motion.button
                     onClick={() => setReplyingTo(null)}
-                    whileHover={{ scale: 1.1 }}
+                    whileHover={{ scale: 1.1, rotate: 90 }}
                     whileTap={{ scale: 0.9 }}
-                    className="flex-shrink-0 p-1 hover:bg-white/20 rounded-lg transition-colors"
+                    transition={{ type: "spring", stiffness: 400 }}
+                    className="flex-shrink-0 p-1.5 hover:bg-white/20 rounded-lg transition-colors"
                   >
                     <X className="w-4 h-4 text-white" />
                   </motion.button>
@@ -876,15 +993,16 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
               )}
             </AnimatePresence>
 
-            <form onSubmit={handleSendMessage} className="flex gap-2">
-              <div className="flex-1 relative">
+            <form onSubmit={handleSendMessage} className="flex gap-3">
+              <div className="flex-1 relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/20 to-violet-600/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
                 <input
                   type="text"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder={isListening ? 'Listening...' : `Type in ${language}...`}
                   disabled={loading}
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-12 border-2 border-gray-600/50 bg-gray-800/80 backdrop-blur-lg rounded-xl focus:outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/30 disabled:opacity-50 text-sm sm:text-base transition-all text-white placeholder:text-gray-400 shadow-md"
+                  className="relative w-full px-4 sm:px-5 py-3 sm:py-3.5 pr-12 border-2 border-white/10 bg-white/5 backdrop-blur-xl rounded-xl focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 disabled:opacity-50 text-sm sm:text-base transition-all text-white placeholder:text-white/40 shadow-lg hover:border-white/20"
                 />
                 {/* Microphone Button */}
                 {sttSupported && (
@@ -896,13 +1014,18 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
                     whileTap={{ scale: 0.9 }}
                     className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all ${
                       isListening
-                        ? 'bg-red-500 text-white animate-pulse'
-                        : 'hover:bg-white/20 text-white/60 hover:text-white'
+                        ? 'bg-red-500 text-white shadow-lg shadow-red-500/30'
+                        : 'hover:bg-white/10 text-white/50 hover:text-white'
                     }`}
                     title={isListening ? 'Stop listening' : 'Speak to type'}
                   >
                     {isListening ? (
-                      <MicOff className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      >
+                        <MicOff className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </motion.div>
                     ) : (
                       <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
                     )}
@@ -912,35 +1035,41 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
                 <AnimatePresence>
                   {interimTranscript && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute -top-8 left-0 bg-blue-500 text-white text-xs px-3 py-1 rounded-lg shadow-lg"
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="absolute -top-10 left-0 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs px-4 py-1.5 rounded-lg shadow-lg shadow-blue-500/30"
                     >
                       {interimTranscript}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-              <motion.button
+              <ShimmerButton
                 type="submit"
                 disabled={loading || !inputMessage.trim()}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-4 sm:px-6 py-2.5 sm:py-3 bg-white text-purple-600 rounded-xl hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/40 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm sm:text-base flex items-center gap-2 transition-all shadow-md hover:shadow-lg"
+                shimmerColor="#ffffff"
+                shimmerSize="0.08em"
+                borderRadius="12px"
+                shimmerDuration="2.5s"
+                background={loading || !inputMessage.trim()
+                  ? "rgba(100, 100, 100, 0.5)"
+                  : "linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #7c3aed 100%)"
+                }
+                className="px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base shadow-lg shadow-purple-500/30 disabled:shadow-none disabled:opacity-50"
               >
                 {loading ? (
                   <>
                     <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                    <span className="hidden sm:inline">Sending...</span>
+                    <span className="hidden sm:inline ml-2">Sending...</span>
                   </>
                 ) : (
                   <>
                     <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="hidden sm:inline">Send</span>
+                    <span className="hidden sm:inline ml-2">Send</span>
                   </>
                 )}
-              </motion.button>
+              </ShimmerButton>
             </form>
           </div>
         </div>
