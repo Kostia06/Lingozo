@@ -33,6 +33,10 @@ export function MagicCard({
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
+      // Disable pointer tracking on mobile for better performance
+      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+        return;
+      }
       const rect = e.currentTarget.getBoundingClientRect()
       mouseX.set(e.clientX - rect.left)
       mouseY.set(e.clientY - rect.top)

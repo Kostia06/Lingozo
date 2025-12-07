@@ -1,0 +1,44 @@
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradientMain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradientAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0891b2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="128" height="128" fill="white"/>
+
+  <!-- Main circle background -->
+  <circle cx="64" cy="64" r="60" fill="url(#gradientMain)" opacity="0.1"/>
+  <circle cx="64" cy="64" r="55" fill="white"/>
+
+  <!-- Speech bubble (left) -->
+  <g transform="translate(38, 42)">
+    <path d="M 3 0 L 22 0 Q 25 0 25 3 L 25 15 Q 25 18 22 18 L 10 18 L 7 23 L 8 18 L 3 18 Q 0 18 0 15 L 0 3 Q 0 0 3 0 Z" 
+          fill="url(#gradientMain)" opacity="0.9"/>
+    <circle cx="9" cy="9" r="1.5" fill="white"/>
+    <circle cx="15" cy="9" r="1.5" fill="white"/>
+    <circle cx="21" cy="9" r="1.5" fill="white"/>
+  </g>
+
+  <!-- Speech bubble (right) -->
+  <g transform="translate(48, 55)">
+    <path d="M 3 0 L 22 0 Q 25 0 25 3 L 25 15 Q 25 18 22 18 L 15 18 L 17 23 L 14 18 L 3 18 Q 0 18 0 15 L 0 3 Q 0 0 3 0 Z" 
+          fill="url(#gradientAccent)" opacity="0.9"/>
+    <circle cx="8" cy="9" r="1.5" fill="white"/>
+    <circle cx="14" cy="9" r="1.5" fill="white"/>
+    <circle cx="20" cy="9" r="1.5" fill="white"/>
+  </g>
+
+  <!-- Central design -->
+  <circle cx="64" cy="64" r="14" fill="none" stroke="url(#gradientMain)" stroke-width="1.5" opacity="0.4"/>
+  <circle cx="64" cy="64" r="9" fill="none" stroke="url(#gradientAccent)" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Border -->
+  <circle cx="64" cy="64" r="60" fill="none" stroke="url(#gradientMain)" stroke-width="1" opacity="0.2"/>
+</svg>

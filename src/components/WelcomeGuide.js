@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   X,
   MessageSquare,
@@ -103,18 +104,24 @@ const GUIDE_STEPS = [
 ];
 
 export default function WelcomeGuide() {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [hasSeenGuide, setHasSeenGuide] = useState(false);
 
   useEffect(() => {
+    // Only show guide if user is authenticated
+    if (!user) {
+      return;
+    }
+
     // Check if user has seen the guide before
     const seen = localStorage.getItem('lingozo_guide_seen');
     if (!seen) {
       setIsOpen(true);
     }
     setHasSeenGuide(!!seen);
-  }, []);
+  }, [user]);
 
   const handleClose = () => {
     setIsOpen(false);
@@ -143,6 +150,11 @@ export default function WelcomeGuide() {
   const currentGuide = GUIDE_STEPS[currentStep];
   const Icon = currentGuide.icon;
   const progress = ((currentStep + 1) / GUIDE_STEPS.length) * 100;
+
+  // Don't render anything if user is not authenticated
+  if (!user) {
+    return null;
+  }
 
   return (
     <>

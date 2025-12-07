@@ -21,6 +21,10 @@ function MousePosition(): MousePosition {
   })
 
   useEffect(() => {
+    // Don't track mouse on mobile devices
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (isMobile) return;
+
     const handleMouseMove = (event: MouseEvent) => {
       setMousePosition({ x: event.clientX, y: event.clientY })
     }
@@ -101,6 +105,12 @@ export const Particles: React.FC<ParticlesProps> = ({
   const resizeTimeout = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
+    // Disable particles on mobile for better performance
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (isMobile) {
+      return;
+    }
+
     if (canvasRef.current) {
       context.current = canvasRef.current.getContext("2d")
     }

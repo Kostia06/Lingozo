@@ -28,7 +28,16 @@ export const Meteors = ({
   )
 
   useEffect(() => {
-    const styles = [...new Array(number)].map(() => ({
+    // Disable meteors on mobile for better performance
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (isMobile) {
+      setMeteorStyles([]);
+      return;
+    }
+
+    // Reduce number on smaller screens
+    const meteorCount = window.innerWidth < 1024 ? Math.floor(number / 2) : number;
+    const styles = [...new Array(meteorCount)].map(() => ({
       "--angle": -angle + "deg",
       top: "-5%",
       left: `calc(0% + ${Math.floor(Math.random() * window.innerWidth)}px)`,

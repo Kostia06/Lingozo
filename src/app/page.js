@@ -84,34 +84,25 @@ export default function Home() {
         size={0.6}
       />
 
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Animated background elements - optimized for mobile */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none hidden md:block">
         <motion.div
           animate={{
-            scale: [1, 1.3, 1],
+            scale: [1, 1.2, 1],
             rotate: [0, 180, 360],
-            opacity: [0.3, 0.5, 0.3],
+            opacity: [0.2, 0.3, 0.2],
           }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-600/20 to-transparent rounded-full blur-3xl"
+          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-600/15 to-transparent rounded-full blur-xl"
         />
         <motion.div
           animate={{
-            scale: [1.3, 1, 1.3],
+            scale: [1.2, 1, 1.2],
             rotate: [180, 360, 180],
-            opacity: [0.2, 0.4, 0.2],
+            opacity: [0.15, 0.25, 0.15],
           }}
           transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-violet-600/20 to-transparent rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-            opacity: [0.1, 0.3, 0.1],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-full blur-3xl"
+          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-violet-600/15 to-transparent rounded-full blur-xl"
         />
       </div>
 
@@ -168,28 +159,28 @@ export default function Home() {
 
           {/* CTA Buttons */}
           <BlurFade delay={0.5} inView>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <Link href="/signup">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-16 px-4">
+              <Link href="/signup" className="w-full sm:w-auto">
                 <ShimmerButton
                   shimmerColor="#ffffff"
                   shimmerSize="0.1em"
                   borderRadius="16px"
                   shimmerDuration="2s"
                   background="linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #7c3aed 100%)"
-                  className="px-8 py-4 text-lg font-semibold shadow-2xl shadow-purple-500/40 hover:shadow-purple-500/60 transition-shadow"
+                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold shadow-2xl shadow-purple-500/40 hover:shadow-purple-500/60 transition-shadow"
                 >
-                  <Sparkles className="w-5 h-5 mr-2" />
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   Get Started Free
                 </ShimmerButton>
               </Link>
               <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                className="w-full sm:w-auto"
               >
                 <Link
                   href="/login"
-                  className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-xl text-white px-8 py-4 rounded-2xl font-semibold hover:bg-white/20 transition-all border border-white/30 hover:border-white/50 shadow-lg"
+                  className="flex items-center justify-center gap-2 bg-white/10 backdrop-blur-xl text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-semibold hover:bg-white/20 transition-all border border-white/30 hover:border-white/50 shadow-lg w-full sm:w-auto text-base sm:text-lg"
                 >
                   Sign In
                 </Link>

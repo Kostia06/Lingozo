@@ -90,7 +90,7 @@ export default function FeaturesPanel({ language, onFeatureSelect, onClose }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/70 backdrop-blur-xl z-50 flex items-center justify-center p-2 sm:p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm md:backdrop-blur-xl z-50 flex items-center justify-center p-2 sm:p-4"
       onClick={onClose}
     >
       <motion.div
@@ -99,10 +99,12 @@ export default function FeaturesPanel({ language, onFeatureSelect, onClose }) {
         exit={{ scale: 0.9, opacity: 0, y: 30 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-gray-900/95 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 w-full max-w-4xl h-[85vh] sm:h-auto sm:max-h-[85vh] overflow-y-auto shadow-2xl border border-white/10 relative"
+        className="bg-gray-900/98 backdrop-blur-sm md:backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 w-full max-w-4xl h-[85vh] sm:h-auto sm:max-h-[85vh] overflow-y-auto shadow-2xl border border-white/10 relative"
       >
-        {/* Meteors Effect */}
-        <Meteors number={15} />
+        {/* Meteors Effect - only on desktop */}
+        <div className="hidden md:block">
+          <Meteors number={15} />
+        </div>
 
         {/* Header */}
         <BlurFade delay={0.1} inView>
@@ -147,7 +149,6 @@ export default function FeaturesPanel({ language, onFeatureSelect, onClose }) {
                 gradientTo={feature.gradientTo}
               >
                 <motion.button
-                  whileHover={{ y: -4 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   onClick={() => {
@@ -164,13 +165,11 @@ export default function FeaturesPanel({ language, onFeatureSelect, onClose }) {
                   </div>
 
                   {/* Icon */}
-                  <motion.div
-                    className={`w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-2 sm:mb-4 shadow-lg group-hover:shadow-2xl transition-all flex-shrink-0`}
-                    whileHover={{ rotate: 12, scale: 1.1 }}
-                    transition={{ type: "spring", stiffness: 400 }}
+                  <div
+                    className={`w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-2 sm:mb-4 shadow-lg transition-all flex-shrink-0`}
                   >
                     <feature.icon className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
-                  </motion.div>
+                  </div>
 
                   {/* Content */}
                   <h3 className="text-sm sm:text-lg font-bold text-white mb-1 sm:mb-2 group-hover:text-purple-200 transition-colors line-clamp-1">

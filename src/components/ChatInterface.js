@@ -748,25 +748,25 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
         size={0.4}
       />
 
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Animated background elements - hidden on mobile for performance */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none hidden md:block">
         <motion.div
           animate={{
-            scale: [1, 1.2, 1],
+            scale: [1, 1.1, 1],
             rotate: [0, 90, 0],
-            opacity: [0.15, 0.25, 0.15],
+            opacity: [0.1, 0.15, 0.1],
           }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-600/15 to-transparent rounded-full blur-3xl"
+          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-600/10 to-transparent rounded-full blur-xl"
         />
         <motion.div
           animate={{
-            scale: [1.2, 1, 1.2],
+            scale: [1.1, 1, 1.1],
             rotate: [90, 0, 90],
-            opacity: [0.1, 0.2, 0.1],
+            opacity: [0.05, 0.1, 0.05],
           }}
           transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-violet-600/15 to-transparent rounded-full blur-3xl"
+          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-violet-600/10 to-transparent rounded-full blur-xl"
         />
       </div>
 
@@ -785,7 +785,7 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
       )}
 
       {/* Header with Glass Effect */}
-      <div className="bg-gray-900/80 backdrop-blur-md border-b border-gray-700/50 px-3 sm:px-6 py-2 sm:py-4 flex items-center justify-between gap-2 shadow-lg relative z-10">
+      <div className="bg-gray-900/90 backdrop-blur-sm md:backdrop-blur-md border-b border-gray-700/50 px-3 sm:px-6 py-2 sm:py-4 flex items-center justify-between gap-2 shadow-lg relative z-10">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           {/* Mobile: Add left padding to avoid hamburger overlap */}
           <div className="pl-12 md:pl-0 min-w-0 flex items-center gap-2 flex-1">
@@ -825,10 +825,9 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
         <div className="flex items-center gap-1 sm:gap-2">
           <motion.button
             onClick={() => setShowAllTranslations(!showAllTranslations)}
-            whileHover={{ scale: 1.05, y: -1 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            className={`p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl transition-all flex-shrink-0 border shadow-md ${
+            className={`p-2.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl transition-all flex-shrink-0 border shadow-md min-h-[44px] ${
               showAllTranslations
                 ? 'text-white bg-gradient-to-r from-blue-500 to-cyan-500 border-blue-400 shadow-blue-500/30'
                 : 'text-white bg-white/10 hover:bg-white/20 border-white/20 hover:border-white/30'
@@ -841,32 +840,29 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
           </motion.button>
           <motion.button
             onClick={() => setShowNotes(!showNotes)}
-            whileHover={{ scale: 1.05, y: -1 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            className="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-all flex-shrink-0 border border-white/20 hover:border-white/30 flex items-center gap-1.5 shadow-md"
+            className="p-2.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-all flex-shrink-0 border border-white/20 hover:border-white/30 flex items-center gap-1.5 shadow-md min-h-[44px]"
           >
-            <StickyNote className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <StickyNote className="w-4 h-4 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">My Notes</span>
           </motion.button>
           <motion.button
             onClick={() => setShowFeaturesPanel(true)}
-            whileHover={{ scale: 1.05, y: -1 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            className="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white rounded-lg sm:rounded-xl transition-all flex-shrink-0 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 flex items-center gap-1.5"
+            className="p-2.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white rounded-lg sm:rounded-xl transition-all flex-shrink-0 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 flex items-center gap-1.5 min-h-[44px]"
           >
-            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <Sparkles className="w-4 h-4 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Features</span>
           </motion.button>
           <motion.button
             onClick={() => setShowVocabPanel(true)}
-            whileHover={{ scale: 1.05, y: -1 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            className="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-all flex-shrink-0 border border-white/20 hover:border-white/30 flex items-center gap-1.5 shadow-md"
+            className="p-2.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-all flex-shrink-0 border border-white/20 hover:border-white/30 flex items-center gap-1.5 shadow-md min-h-[44px]"
           >
-            <BookmarkCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <BookmarkCheck className="w-4 h-4 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Vocab</span>
           </motion.button>
         </div>
@@ -927,7 +923,7 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
           </div>
 
           {/* Input with Glass Effect */}
-          <div className="border-t border-gray-700/50 px-3 sm:px-6 py-3 sm:py-4 bg-gray-900/90 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+          <div className="border-t border-gray-700/50 px-3 sm:px-6 py-3 sm:py-4 bg-gray-900/95 backdrop-blur-sm md:backdrop-blur-lg shadow-2xl relative overflow-hidden">
             {/* Subtle gradient border effect */}
             <div className={`absolute top-0 left-0 right-0 h-px ${
               activeFeature === 'tea-time'
@@ -995,14 +991,14 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
 
             <form onSubmit={handleSendMessage} className="flex gap-3">
               <div className="flex-1 relative group">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/20 to-violet-600/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
+                <div className="hidden md:block absolute -inset-0.5 bg-gradient-to-r from-purple-600/20 to-violet-600/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
                 <input
                   type="text"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder={isListening ? 'Listening...' : `Type in ${language}...`}
                   disabled={loading}
-                  className="relative w-full px-4 sm:px-5 py-3 sm:py-3.5 pr-12 border-2 border-white/10 bg-white/5 backdrop-blur-xl rounded-xl focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 disabled:opacity-50 text-sm sm:text-base transition-all text-white placeholder:text-white/40 shadow-lg hover:border-white/20"
+                  className="relative w-full px-4 sm:px-5 py-3 sm:py-3.5 pr-12 border-2 border-white/10 bg-white/10 backdrop-blur-sm md:backdrop-blur-md rounded-xl focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 disabled:opacity-50 text-sm sm:text-base transition-all text-white placeholder:text-white/40 shadow-lg hover:border-white/20"
                 />
                 {/* Microphone Button */}
                 {sttSupported && (

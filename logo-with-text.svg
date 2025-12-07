@@ -1,0 +1,58 @@
+<svg viewBox="0 0 400 150" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradientMain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradientAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0891b2;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Logo Icon -->
+  <g transform="translate(35, 35)">
+    <!-- Background circle -->
+    <circle cx="0" cy="0" r="38" fill="white" filter="url(#glow)"/>
+    <circle cx="0" cy="0" r="38" fill="none" stroke="url(#gradientMain)" stroke-width="1" opacity="0.2"/>
+
+    <!-- Speech bubble (left) -->
+    <g transform="translate(-12, -8)">
+      <path d="M 2 0 L 14 0 Q 16 0 16 2 L 16 10 Q 16 12 14 12 L 6 12 L 4 15 L 5 12 L 2 12 Q 0 12 0 10 L 0 2 Q 0 0 2 0 Z" 
+            fill="url(#gradientMain)" opacity="0.85"/>
+      <circle cx="6" cy="6" r="1" fill="white"/>
+      <circle cx="10" cy="6" r="1" fill="white"/>
+      <circle cx="14" cy="6" r="1" fill="white"/>
+    </g>
+
+    <!-- Speech bubble (right) -->
+    <g transform="translate(5, 2)">
+      <path d="M 2 0 L 14 0 Q 16 0 16 2 L 16 10 Q 16 12 14 12 L 10 12 L 11 15 L 9 12 L 2 12 Q 0 12 0 10 L 0 2 Q 0 0 2 0 Z" 
+            fill="url(#gradientAccent)" opacity="0.85"/>
+      <circle cx="5" cy="6" r="1" fill="white"/>
+      <circle cx="9" cy="6" r="1" fill="white"/>
+      <circle cx="13" cy="6" r="1" fill="white"/>
+    </g>
+
+    <!-- Central circles -->
+    <circle cx="0" cy="0" r="10" fill="none" stroke="url(#gradientMain)" stroke-width="1.2" opacity="0.4"/>
+    <circle cx="0" cy="0" r="6" fill="none" stroke="url(#gradientAccent)" stroke-width="1.2" opacity="0.6"/>
+  </g>
+
+  <!-- Text -->
+  <text x="100" y="75" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="url(#gradientMain)" letter-spacing="-2">
+    Lingozo
+  </text>
+  
+  <!-- Tagline -->
+  <text x="100" y="105" font-family="Arial, sans-serif" font-size="14" fill="#666" letter-spacing="0.5" font-weight="500">
+    Learn Languages with AI
+  </text>
+</svg>

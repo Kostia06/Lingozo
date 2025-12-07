@@ -1,0 +1,59 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradientMain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradientAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0891b2;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#gradientMain)" opacity="0.1"/>
+  
+  <!-- Main circle background -->
+  <circle cx="100" cy="100" r="85" fill="white" filter="url(#glow)"/>
+
+  <!-- Speech bubble (left) -->
+  <g transform="translate(60, 75)">
+    <path d="M 5 0 L 35 0 Q 40 0 40 5 L 40 25 Q 40 30 35 30 L 15 30 L 10 38 L 12 30 L 5 30 Q 0 30 0 25 L 0 5 Q 0 0 5 0 Z" 
+          fill="url(#gradientMain)" opacity="0.9"/>
+    <!-- Text inside bubble -->
+    <circle cx="15" cy="15" r="2.5" fill="white"/>
+    <circle cx="24" cy="15" r="2.5" fill="white"/>
+    <circle cx="33" cy="15" r="2.5" fill="white"/>
+  </g>
+
+  <!-- Speech bubble (right) -->
+  <g transform="translate(105, 90)">
+    <path d="M 5 0 L 35 0 Q 40 0 40 5 L 40 25 Q 40 30 35 30 L 25 30 L 28 38 L 23 30 L 5 30 Q 0 30 0 25 L 0 5 Q 0 0 5 0 Z" 
+          fill="url(#gradientAccent)" opacity="0.9"/>
+    <!-- Text inside bubble -->
+    <circle cx="12" cy="15" r="2.5" fill="white"/>
+    <circle cx="21" cy="15" r="2.5" fill="white"/>
+    <circle cx="30" cy="15" r="2.5" fill="white"/>
+  </g>
+
+  <!-- Global/conversation icon -->
+  <g transform="translate(100, 100)">
+    <!-- Stylized globe with speech elements -->
+    <circle cx="0" cy="0" r="20" fill="none" stroke="url(#gradientMain)" stroke-width="2" opacity="0.4"/>
+    <circle cx="0" cy="0" r="14" fill="none" stroke="url(#gradientAccent)" stroke-width="2" opacity="0.6"/>
+    
+    <!-- Language symbols -->
+    <line x1="-12" y1="0" x2="12" y2="0" stroke="url(#gradientMain)" stroke-width="1.5" opacity="0.5"/>
+    <line x1="0" y1="-12" x2="0" y2="12" stroke="url(#gradientAccent)" stroke-width="1.5" opacity="0.5"/>
+  </g>
+
+  <!-- Outer accent ring -->
+  <circle cx="100" cy="100" r="88" fill="none" stroke="url(#gradientMain)" stroke-width="1.5" opacity="0.3" stroke-dasharray="5,3"/>
+</svg>
