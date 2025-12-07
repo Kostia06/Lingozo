@@ -7,8 +7,62 @@ import CustomNotes from './CustomNotes';
 import MusicCard from './MusicCard';
 import FeaturesPanel from './FeaturesPanel';
 import QuizComponent from './QuizComponent';
+
+// Quiz Results Display Component
+const QuizResultsDisplay = ({ results, summary, onClose }) => {
+  const { score, totalQuestions, percentage, quizType } = results;
+  const isPerfect = percentage === 100;
+  const isGood = percentage >= 70;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 shadow-xl mx-2 sm:mx-0"
+    >
+      <div className="text-center">
+        {/* Trophy Icon */}
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", delay: 0.2 }}
+          className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br ${
+            isPerfect ? 'from-yellow-400 to-orange-500' :
+            isGood ? 'from-green-400 to-emerald-500' :
+            'from-blue-400 to-cyan-500'
+          } flex items-center justify-center`}
+        >
+          <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+        </motion.div>
+
+        {/* Score */}
+        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          {isPerfect ? '🎉 Perfect Score!' :
+           isGood ? '👏 Great Job!' :
+           '💪 Keep Practicing!'}
+        </h3>
+        <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3 sm:mb-4">
+          {score} / {totalQuestions}
+        </p>
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">
+          You got {percentage}% correct in {quizType} quiz!
+        </p>
+
+        {/* Action */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onClose}
+          className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
+        >
+          Continue Learning
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+};
 import SavedVocab from './SavedVocab';
-import { Menu, Send, Loader2, Mic, MicOff, Sparkles, BookmarkCheck, X, StickyNote, Zap } from 'lucide-react';
+import { Menu, Send, Loader2, Mic, MicOff, Sparkles, BookmarkCheck, X, StickyNote, Zap, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { startListening, isSTTSupported } from '@/lib/audio-utils';
 import { Particles } from '@/components/ui/particles';
@@ -145,7 +199,50 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+
+      // Parse messages and filter out quiz/feature JSON
+      const regularMessages = [];
+      let lastCompletedQuiz = null;
+
+      (data || []).forEach((msg) => {
+        // Check if message contains quiz/feature JSON
+        if (msg.role === 'assistant' && typeof msg.content === 'string') {
+          try {
+            const jsonMatch = msg.content.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[0]);
+
+              // If it's a completed quiz, restore it
+              if (parsed.type === 'quiz-completed' && parsed.results) {
+                lastCompletedQuiz = {
+                  type: 'quiz-completed',
+                  results: parsed.results,
+                  summary: parsed.summary
+                };
+                return; // Don't show as regular message
+              }
+
+              // If it's an incomplete quiz, don't show or restore
+              if (parsed.type === 'quiz' || parsed.questions) {
+                return; // Skip adding to regular messages
+              }
+            }
+          } catch (e) {
+            // Not valid JSON, treat as regular message
+          }
+        }
+
+        // Add to regular messages
+        regularMessages.push(msg);
+      });
+
+      setMessages(regularMessages);
+
+      // Restore the last completed quiz if found
+      if (lastCompletedQuiz) {
+        setFeatureData(lastCompletedQuiz);
+        setActiveFeature('quiz-completed');
+      }
     } catch (error) {
       console.error('Error loading messages:', error);
     }
@@ -269,11 +366,16 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
             if (typeof content === 'string' && (content.includes('"type":') || content.includes('"quiz'))) {
               const jsonMatch = content.match(/\{[\s\S]*\}/);
               if (jsonMatch) {
-                const featureData = JSON.parse(jsonMatch[0]);
-                if (featureData.type === 'quiz') {
-                  setFeatureData(featureData);
+                const parsedData = JSON.parse(jsonMatch[0]);
+                if (parsedData.type === 'quiz' || parsedData.questions) {
+                  setFeatureData({
+                    type: 'quiz',
+                    quizType: parsedData.quizType || 'vocabulary',
+                    questions: parsedData.questions
+                  });
+                  setActiveFeature('quiz');
                   setLoading(false);
-                  return;
+                  return; // Don't add quiz JSON to messages
                 }
               }
             }
@@ -428,6 +530,35 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
   const handleFeatureComplete = () => {
     setActiveFeature(null);
     setFeatureData(null);
+  };
+
+  const handleQuizComplete = async (summary, quizResults) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // Save quiz completion with results data
+      const completionData = {
+        type: 'quiz-completed',
+        summary: summary,
+        results: quizResults,
+        completedAt: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          chat_id: chatId,
+          role: 'assistant',
+          content: JSON.stringify(completionData),
+        });
+
+      if (error) {
+        console.error('Error saving quiz completion:', error);
+      }
+    } catch (error) {
+      console.error('Error in handleQuizComplete:', error);
+    }
   };
 
   const handleReply = (message) => {
@@ -873,11 +1004,21 @@ export default function ChatInterface({ chatId, language, onMenuClick }) {
         <div className="flex-1 flex flex-col">
           <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-6">
             {/* Active Feature Display */}
-            {activeFeature && featureData && featureData.type === 'quiz' && (
+            {activeFeature === 'quiz' && featureData && featureData.type === 'quiz' && (
               <QuizComponent
                 quiz={featureData}
                 onComplete={handleFeatureComplete}
+                onQuizComplete={handleQuizComplete}
                 language={language}
+              />
+            )}
+
+            {/* Completed Quiz Results Display */}
+            {activeFeature === 'quiz-completed' && featureData && featureData.type === 'quiz-completed' && (
+              <QuizResultsDisplay
+                results={featureData.results}
+                summary={featureData.summary}
+                onClose={handleFeatureComplete}
               />
             )}
 

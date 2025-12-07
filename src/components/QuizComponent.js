@@ -15,13 +15,34 @@ import {
 export default function QuizComponent({
   quiz,
   onComplete,
-  language
+  language,
+  onQuizComplete
 }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const [answers, setAnswers] = useState([]);
+  const [hasNotifiedCompletion, setHasNotifiedCompletion] = useState(false);
+
+  // Notify parent when quiz is completed
+  useEffect(() => {
+    if (showResult && !hasNotifiedCompletion && onQuizComplete) {
+      const percentage = Math.round((score / quiz.questions.length) * 100);
+      const summary = `📊 Quiz Completed!\n\nScore: ${score}/${quiz.questions.length} (${percentage}%)\nQuiz Type: ${quiz.quizType || 'General'}`;
+
+      const quizResults = {
+        score,
+        totalQuestions: quiz.questions.length,
+        percentage,
+        quizType: quiz.quizType || 'General',
+        answers
+      };
+
+      onQuizComplete(summary, quizResults);
+      setHasNotifiedCompletion(true);
+    }
+  }, [showResult, hasNotifiedCompletion, score, quiz.questions.length, quiz.quizType, answers, onQuizComplete]);
 
   if (!quiz || !quiz.questions || quiz.questions.length === 0) {
     return (
